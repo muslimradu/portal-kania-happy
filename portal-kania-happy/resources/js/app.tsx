@@ -11,11 +11,12 @@ createInertiaApp({
             `./pages/${name}.tsx`,
             import.meta.glob('./pages/**/*.tsx'),
         ),
-    setup({ el, App, props }) {
-        const root = createRoot(el);
-        root.render(<App {...props} />);
-    },
+        setup({ el, App, props }) {
+            if (!el) return;
+            const root = createRoot(el);
+            root.render(<App {...props} />);
+        },
     progress: {
         color: '#7C3AED',
     },
-});
+} as Parameters<typeof createInertiaApp>[0]);
