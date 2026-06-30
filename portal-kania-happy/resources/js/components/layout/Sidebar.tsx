@@ -62,8 +62,8 @@ export default function Sidebar() {
 
                     if (!isOpen) {
                         return (
-                            <Tooltip key={item.label} delayDuration={0}>
-                                <TooltipTrigger asChild>
+                            <Tooltip key={item.label}>
+                                <TooltipTrigger>
                                     {item.disabled ? (
                                         <div>{content}</div>
                                     ) : (
