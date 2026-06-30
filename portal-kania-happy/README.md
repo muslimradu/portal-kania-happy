@@ -1,58 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Portal Kania Happy
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Portal internal berbasis Laravel + Inertia (React/TypeScript) dengan UI shadcn/Tailwind. Dokumen ini merangkum progres pengerjaan berdasarkan step-step pada phase awal proyek.
 
-## About Laravel
+## Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Backend:** Laravel 13, PHP ^8.3
+- **Auth:** Laravel Breeze
+- **Otorisasi:** spatie/laravel-permission (roles & permissions)
+- **Frontend:** Inertia.js (React 19 + TypeScript), Tailwind CSS 4
+- **UI Components:** shadcn/ui (Radix/Base UI), Lucide Icons, Sonner (toast)
+- **State/Form:** Zustand, React Hook Form + Zod
+- **Lainnya:** Ziggy (route helper), Vite 8
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Progres Phase Ini
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Step | Bagian | Isi | Status |
+|---|---|---|---|
+| 1 | Project Setup | Install Laravel 12/13, Breeze, semua package pendukung | ✅ |
+| 2 | Database & Models | Migration, Model, Seeder | ✅ |
+| 3 | Backend Core | SettingsService, Middleware, Exception Handler | ✅ |
+| 4 | Autentikasi | Login page split-screen, logout | x |
+| 5 | Layout Utama | AppLayout, Sidebar, Navbar, Breadcrumb | x |
+| 6 | Global Search UI | Modal CTRL+K (UI saja, belum fungsi pencarian) | x |
+| 7 | Dashboard | Cards, widgets, empty states | x |
+| 8 | Settings Page | General settings + branding | x |
+| 9 | Reusable Components | Semua shared components | x |
+| 10 | Error Pages | 404, 403, 500 | x |
 
-## Learning Laravel
+> Catatan: Global Search (step 6) baru mencakup tampilan modal; logika pencarian backend belum diimplementasikan dan menjadi bagian phase berikutnya.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Struktur Singkat
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```
+app/
+  Http/Controllers/      # DashboardController, ProfileController, Auth/*
+  Http/Middleware/       # HandleInertiaRequests, dll.
+  Models/                # User, Setting, ActivityLog
+  Services/              # SettingsService
+  Helpers/               # helpers.php
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+resources/js/
+  layouts/               # AuthenticatedLayout, GuestLayout
+  pages/                 # Dashboard, Auth/*, Profile/*, errors/*
+  components/            # Komponen Breeze + components/ui (shadcn)
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+database/
+  migrations/            # users, settings, activity_logs, permission tables
+  seeders/
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Tabel Database
 
-## Contributing
+- `users` — data pengguna
+- `settings` — pengaturan umum & branding aplikasi
+- `activity_logs` — log aktivitas pengguna
+- Tabel permission/role dari `spatie/laravel-permission` (`permissions`, `roles`, `model_has_permissions`, `model_has_roles`, `role_has_permissions`)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Instalasi
 
-## Code of Conduct
+1. **Clone & masuk ke folder proyek**
+   ```bash
+   git clone <repo-url> portal-kania
+   cd portal-kania
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2. **Install dependency PHP**
+   ```bash
+   composer install
+   ```
 
-## Security Vulnerabilities
+3. **Install dependency JS**
+   ```bash
+   npm install
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. **Siapkan environment**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## License
+5. **Siapkan database** (default SQLite)
+   ```bash
+   touch database/database.sqlite
+   php artisan migrate --seed
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+6. **Jalankan aplikasi**
+   ```bash
+   composer run dev
+   ```
+   Perintah ini menjalankan server PHP, queue listener, log viewer (Pail), dan Vite secara bersamaan. Atau jalankan manual di dua terminal terpisah:
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+7. Buka `http://localhost:8000` di browser.
+
+## Script Berguna
+
+| Perintah | Keterangan |
+|---|---|
+| `composer run dev` | Jalankan server, queue, pail, dan vite bersamaan |
+| `npm run dev` | Jalankan Vite dev server saja |
+| `npm run build` | Build asset untuk production |
+| `php artisan migrate:fresh --seed` | Reset database & isi ulang seeder |
+| `php artisan pint` | Format kode PHP sesuai standar Laravel |
+| `php artisan test` | Jalankan test suite |
+
+## Lisensi
+
+Proyek internal — hak cipta dipegang oleh pemilik proyek.
