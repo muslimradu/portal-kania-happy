@@ -10,18 +10,26 @@ use Illuminate\Support\Facades\Cache;
 
 class SettingsService
 {
+    protected ?Collection $memoized = null;
+
     public function all(): Collection
     {
+        if ($this->memoized !== null) {
+            return $this->memoized;
+        }
+
         $cached = Cache::rememberForever('settings:all', function () {
             return Setting::all()->toArray();
         });
 
-        return collect($cached)->map(function (array $item) {
+        $this->memoized = collect($cached)->map(function (array $item) {
             $setting = new Setting();
             $setting->forceFill($item);
             $setting->exists = true;
             return $setting;
         });
+
+        return $this->memoized;
     }
 
     public function getPublic(): array
@@ -53,6 +61,7 @@ class SettingsService
         $setting->save();
 
         Cache::forget('settings:all');
+        $this->memoized = null;
 
         return $setting;
     }

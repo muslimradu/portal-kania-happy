@@ -1,110 +1,164 @@
-import Checkbox from '@/components/Checkbox';
-import InputError from '@/components/InputError';
-import InputLabel from '@/components/InputLabel';
-import PrimaryButton from '@/components/PrimaryButton';
-import TextInput from '@/components/TextInput';
-import GuestLayout from '@/layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
+import AuthSplitLayout from '@/layouts/AuthSplitLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useFlashToast } from '@/hooks/useFlashToast';
+import { loginSchema, type LoginFormValues } from '@/lib/validations/auth';
 
-export default function Login({
-    status,
-    canResetPassword,
-}: {
+interface LoginProps {
     status?: string;
     canResetPassword: boolean;
-}) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false as boolean,
+}
+
+export default function Login({ status, canResetPassword }: LoginProps) {
+    useFlashToast();
+    const [showPassword, setShowPassword] = useState(false);
+    const [processing, setProcessing] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        setError,
+        formState: { errors },
+    } = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+            remember: false,
+        },
     });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+    const remember = watch('remember');
 
-        post(route('login'), {
-            onFinish: () => reset('password'),
+    const onSubmit = (data: LoginFormValues) => {
+        setProcessing(true);
+        router.post(route('login'), data, {
+            onError: (serverErrors) => {
+                Object.entries(serverErrors).forEach(([key, message]) => {
+                    setError(key as keyof LoginFormValues, {
+                        type: 'server',
+                        message: message as string,
+                    });
+                });
+            },
+            onFinish: () => setProcessing(false),
         });
     };
 
     return (
-        <GuestLayout>
-            <Head title="Log in" />
+        <AuthSplitLayout
+            title="Selamat Datang Kembali"
+            description="Masuk ke akun Anda untuk mengelola Portal Kania Happy"
+        >
+            <Head title="Masuk" />
 
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
+                <div className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                        <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Input
+                            id="email"
+                            type="email"
+                            autoComplete="username"
+                            autoFocus
+                            placeholder="nama@email.com"
+                            className="rounded-xl pl-10"
+                            {...register('email')}
+                        />
+                    </div>
+                    {errors.email && (
+                        <p className="text-sm text-red-600">{errors.email.message}</p>
+                    )}
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
+                <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                        <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            autoComplete="current-password"
+                            placeholder="••••••••"
+                            className="rounded-xl pl-10 pr-10"
+                            {...register('password')}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600"
+                            tabIndex={-1}
+                        >
+                            {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                            ) : (
+                                <Eye className="h-4 w-4" />
+                            )}
+                        </button>
+                    </div>
+                    {errors.password && (
+                        <p className="text-sm text-red-600">{errors.password.message}</p>
+                    )}
                 </div>
 
-                <div className="mt-4 block">
-                    <label className="flex items-center">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                         <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData(
-                                    'remember',
-                                    (e.target.checked || false) as false,
-                                )
+                            id="remember"
+                            checked={remember}
+                            onCheckedChange={(checked) =>
+                                setValue('remember', checked === true)
                             }
                         />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
-                    </label>
-                </div>
+                        <Label
+                            htmlFor="remember"
+                            className="cursor-pointer text-sm font-normal text-gray-600"
+                        >
+                            Ingat saya
+                        </Label>
+                    </div>
 
-                <div className="mt-4 flex items-center justify-end">
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            className="text-sm font-medium text-violet-600 transition hover:text-violet-700"
                         >
-                            Forgot your password?
+                            Lupa password?
                         </Link>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
                 </div>
+
+                <Button
+                    type="submit"
+                    disabled={processing}
+                    className="w-full rounded-xl bg-violet-600 py-6 text-base font-medium shadow-sm transition hover:bg-violet-700"
+                >
+                    {processing ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Memproses...
+                        </>
+                    ) : (
+                        'Masuk'
+                    )}
+                </Button>
             </form>
-        </GuestLayout>
+        </AuthSplitLayout>
     );
 }
