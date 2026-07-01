@@ -1,56 +1,56 @@
-import InputError from '@/components/InputError';
-import InputLabel from '@/components/InputLabel';
-import PrimaryButton from '@/components/PrimaryButton';
-import TextInput from '@/components/TextInput';
-import GuestLayout from '@/layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
+import { Loader2, Lock } from 'lucide-react';
 import { FormEventHandler } from 'react';
+import AuthSplitLayout from '@/layouts/AuthSplitLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function ConfirmPassword() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        password: '',
-    });
+    const { data, setData, post, processing, errors } = useForm({ password: '' });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-
-        post(route('password.confirm'), {
-            onFinish: () => reset('password'),
-        });
+        post(route('password.confirm'));
     };
 
     return (
-        <GuestLayout>
-            <Head title="Confirm Password" />
+        <AuthSplitLayout
+            title="Konfirmasi Password"
+            description="Masukkan password Anda untuk melanjutkan"
+        >
+            <Head title="Konfirmasi Password" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                This is a secure area of the application. Please confirm your
-                password before continuing.
-            </div>
-
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
+            <form onSubmit={submit} className="space-y-5">
+                <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                        <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Input
+                            id="password"
+                            type="password"
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            placeholder="••••••••"
+                            className="rounded-xl pl-10"
+                            autoFocus
+                        />
+                    </div>
+                    {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirm
-                    </PrimaryButton>
-                </div>
+                <Button
+                    type="submit"
+                    disabled={processing}
+                    className="w-full rounded-xl bg-violet-600 py-6 text-base font-medium hover:bg-violet-700"
+                >
+                    {processing ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...</>
+                    ) : (
+                        'Konfirmasi'
+                    )}
+                </Button>
             </form>
-        </GuestLayout>
+        </AuthSplitLayout>
     );
 }

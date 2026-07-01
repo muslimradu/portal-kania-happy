@@ -29,7 +29,7 @@ export default function Navbar() {
         .toUpperCase();
 
     return (
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 px-4 backdrop-blur-sm lg:px-6">
+        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-6">
             <div className="flex items-center gap-3">
                 {/* Mobile menu trigger */}
                 <button
@@ -76,7 +76,7 @@ export default function Navbar() {
                             </p>
                         </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuContent align="end" className="w-56 bg-white">
                         <DropdownMenuGroup>
                             <DropdownMenuLabel>
                                 <p className="text-sm font-medium">{user?.name}</p>

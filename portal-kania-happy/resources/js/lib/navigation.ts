@@ -73,7 +73,7 @@ export const navigationItems: NavItem[] = [
     },
     {
         label: 'Configuration',
-        href: '#',
+        href: '/settings/general',
         icon: Settings,
         routeName: 'settings',
         children: [
