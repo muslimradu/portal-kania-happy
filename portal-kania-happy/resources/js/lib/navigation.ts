@@ -7,6 +7,9 @@ import {
     FileBarChart,
     Wallet,
     Settings,
+    SlidersHorizontal,
+    Palette,
+    CreditCard,
     type LucideIcon,
 } from 'lucide-react';
 
@@ -16,6 +19,7 @@ export interface NavItem {
     icon: LucideIcon;
     routeName: string;
     disabled?: boolean;
+    children?: NavItem[];
 }
 
 export const navigationItems: NavItem[] = [
@@ -71,8 +75,27 @@ export const navigationItems: NavItem[] = [
         label: 'Configuration',
         href: '#',
         icon: Settings,
-        routeName: 'configuration',
-        disabled: true,
-        // Will become a sub-menu in Step 8: General Settings, Branding, Payment Configuration
+        routeName: 'settings',
+        children: [
+            {
+                label: 'General Settings',
+                href: '/settings/general',
+                icon: SlidersHorizontal,
+                routeName: 'settings.general',
+            },
+            {
+                label: 'Branding',
+                href: '/settings/branding',
+                icon: Palette,
+                routeName: 'settings.branding',
+            },
+            {
+                label: 'Payment Configuration',
+                href: '#',
+                icon: CreditCard,
+                routeName: 'settings.payment',
+                disabled: true,
+            },
+        ],
     },
 ];

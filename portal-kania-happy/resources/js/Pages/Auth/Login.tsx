@@ -119,11 +119,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Checkbox
+                    <Checkbox
                             id="remember"
                             checked={remember}
                             onCheckedChange={(checked) =>
-                                setValue('remember', checked === true)
+                                setValue('remember', checked)
                             }
                         />
                         <Label

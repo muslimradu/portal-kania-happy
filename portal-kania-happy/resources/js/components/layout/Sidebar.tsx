@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronLeft, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronDown, LogOut } from 'lucide-react';
 import AppLogo from '@/components/AppLogo';
-import { navigationItems } from '@/lib/navigation';
+import { navigationItems, type NavItem } from '@/lib/navigation';
 import { useSidebarStore } from '@/hooks/useSidebarStore';
 import {
     Tooltip,
@@ -9,6 +10,131 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+
+function NavItemRow({
+    item,
+    isOpen,
+    url,
+}: {
+    item: NavItem;
+    isOpen: boolean;
+    url: string;
+}) {
+    const hasChildren = item.children && item.children.length > 0;
+    const isActive = url.startsWith(item.href) && item.href !== '#';
+    const isChildActive = item.children?.some(
+        (child) => url.startsWith(child.href) && child.href !== '#',
+    );
+    const [expanded, setExpanded] = useState(isChildActive ?? false);
+    const Icon = item.icon;
+
+    const rowContent = (
+        <div
+            className={cn(
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
+                isActive || isChildActive
+                    ? 'bg-violet-50 text-violet-700'
+                    : item.disabled
+                      ? 'cursor-not-allowed text-gray-300'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                !isOpen && 'justify-center',
+            )}
+        >
+            <Icon className="h-5 w-5 shrink-0" />
+            {isOpen && (
+                <>
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {hasChildren && (
+                        <ChevronDown
+                            className={cn(
+                                'h-4 w-4 transition-transform',
+                                expanded && 'rotate-180',
+                            )}
+                        />
+                    )}
+                </>
+            )}
+        </div>
+    );
+
+    const wrappedRow = !isOpen ? (
+        <Tooltip key={item.label}>
+            <TooltipTrigger>
+                {item.disabled ? (
+                    <div>{rowContent}</div>
+                ) : hasChildren ? (
+                    <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="w-full"
+                    >
+                        {rowContent}
+                    </button>
+                ) : (
+                    <Link href={item.href}>{rowContent}</Link>
+                )}
+            </TooltipTrigger>
+            <TooltipContent side="right">
+                {item.label}
+                {item.disabled && ' (Segera Hadir)'}
+            </TooltipContent>
+        </Tooltip>
+    ) : item.disabled ? (
+        <div>{rowContent}</div>
+    ) : hasChildren ? (
+        <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-full"
+        >
+            {rowContent}
+        </button>
+    ) : (
+        <Link href={item.href}>{rowContent}</Link>
+    );
+
+    return (
+        <div key={item.label}>
+            {wrappedRow}
+            {hasChildren && isOpen && expanded && (
+                <div className="ml-4 mt-1 space-y-1 border-l border-gray-100 pl-3">
+                    {item.children!.map((child) => {
+                        const childActive =
+                            url.startsWith(child.href) && child.href !== '#';
+                        const ChildIcon = child.icon;
+
+                        const childContent = (
+                            <div
+                                className={cn(
+                                    'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150',
+                                    childActive
+                                        ? 'bg-violet-50 text-violet-700'
+                                        : child.disabled
+                                          ? 'cursor-not-allowed text-gray-300'
+                                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                )}
+                            >
+                                <ChildIcon className="h-4 w-4 shrink-0" />
+                                <span className="truncate">{child.label}</span>
+                                {child.disabled && (
+                                    <span className="ml-auto text-xs text-gray-300">
+                                        Soon
+                                    </span>
+                                )}
+                            </div>
+                        );
+
+                        return child.disabled ? (
+                            <div key={child.label}>{childContent}</div>
+                        ) : (
+                            <Link key={child.label} href={child.href}>
+                                {childContent}
+                            </Link>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function Sidebar() {
     const { isOpen, toggle } = useSidebarStore();
@@ -18,7 +144,7 @@ export default function Sidebar() {
     return (
         <aside
             className={cn(
-                'sticky top-0 hidden h-screen flex-col border-r border-gray-200 bg-white transition-all duration-200 lg:flex',
+                'sticky top-0 hidden h-screen flex-col border-r border-gray-200 bg-white transition-all duration-200 md:flex',
                 isOpen ? 'w-64' : 'w-20',
             )}
         >
@@ -39,53 +165,14 @@ export default function Sidebar() {
 
             {/* Navigation */}
             <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-                {navigationItems.map((item) => {
-                    const isActive = url.startsWith(item.href) && item.href !== '#';
-                    const Icon = item.icon;
-
-                    const content = (
-                        <div
-                            className={cn(
-                                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
-                                isActive
-                                    ? 'bg-violet-50 text-violet-700'
-                                    : item.disabled
-                                      ? 'cursor-not-allowed text-gray-300'
-                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                                !isOpen && 'justify-center',
-                            )}
-                        >
-                            <Icon className="h-5 w-5 shrink-0" />
-                            {isOpen && <span className="truncate">{item.label}</span>}
-                        </div>
-                    );
-
-                    if (!isOpen) {
-                        return (
-                            <Tooltip key={item.label}>
-                                <TooltipTrigger>
-                                    {item.disabled ? (
-                                        <div>{content}</div>
-                                    ) : (
-                                        <Link href={item.href}>{content}</Link>
-                                    )}
-                                </TooltipTrigger>
-                                <TooltipContent side="right">
-                                    {item.label}
-                                    {item.disabled && ' (Segera Hadir)'}
-                                </TooltipContent>
-                            </Tooltip>
-                        );
-                    }
-
-                    return item.disabled ? (
-                        <div key={item.label}>{content}</div>
-                    ) : (
-                        <Link key={item.label} href={item.href}>
-                            {content}
-                        </Link>
-                    );
-                })}
+                {navigationItems.map((item) => (
+                    <NavItemRow
+                        key={item.label}
+                        item={item}
+                        isOpen={isOpen}
+                        url={url}
+                    />
+                ))}
             </nav>
 
             {/* Logout */}

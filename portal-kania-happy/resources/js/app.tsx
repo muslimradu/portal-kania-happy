@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { route as ziggyRoute } from 'ziggy-js';
 import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 declare global {
     var route: typeof ziggyRoute;
@@ -21,10 +22,10 @@ createInertiaApp({
         if (!el) return;
         const root = createRoot(el);
         root.render(
-            <>
+            <TooltipProvider>
                 <App {...props} />
                 <Toaster position="top-right" richColors closeButton />
-            </>
+            </TooltipProvider>
         );
     },
     progress: {

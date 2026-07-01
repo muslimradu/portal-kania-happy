@@ -4,6 +4,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuGroup,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -33,7 +34,7 @@ export default function Navbar() {
                 {/* Mobile menu trigger */}
                 <button
                     onClick={() => setMobileOpen(true)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 lg:hidden"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 md:hidden"
                 >
                     <Menu className="h-5 w-5" />
                 </button>
@@ -63,37 +64,41 @@ export default function Navbar() {
 
                 {/* Profile Menu */}
                 <DropdownMenu>
-                    <DropdownMenuTrigger>
-                        <button className="flex items-center gap-2 rounded-xl p-1.5 pr-3 transition hover:bg-gray-100">
-                            <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-violet-100 text-sm font-semibold text-violet-700">
-                                    {initials ?? 'AD'}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="hidden text-left sm:block">
-                                <p className="text-sm font-medium text-gray-900">
-                                    {user?.name ?? 'Administrator'}
-                                </p>
-                            </div>
-                        </button>
+                    <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl p-1.5 pr-3 transition hover:bg-gray-100">
+                        <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-violet-100 text-sm font-semibold text-violet-700">
+                                {initials ?? 'AD'}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="hidden text-left sm:block">
+                            <p className="text-sm font-medium text-gray-900">
+                                {user?.name ?? 'Administrator'}
+                            </p>
+                        </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>
-                            <p className="text-sm font-medium">{user?.name}</p>
-                            <p className="text-xs font-normal text-gray-400">
-                                {user?.email}
-                            </p>
-                        </DropdownMenuLabel>
+                        <DropdownMenuGroup>
+                            <DropdownMenuLabel>
+                                <p className="text-sm font-medium">{user?.name}</p>
+                                <p className="text-xs font-normal text-gray-400">
+                                    {user?.email}
+                                </p>
+                            </DropdownMenuLabel>
+                        </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                            <Link href="/profile" className="w-full">Profil Saya</Link>
-                        </DropdownMenuItem>
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem className="cursor-pointer">
+                                <Link href="/profile" className="w-full">Profil Saya</Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive">
-                            <Link href={route('logout')} method="post" as="button" className="w-full text-left">
-                                Keluar
-                            </Link>
-                        </DropdownMenuItem>
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem variant="destructive" className="cursor-pointer">
+                                <Link href={route('logout')} method="post" as="button" className="w-full text-left">
+                                    Keluar
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

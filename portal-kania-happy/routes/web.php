@@ -17,6 +17,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Settings — placeholder, akan dibangun di Step 8
+    Route::get('/settings/general', function () {
+        return Inertia::render('settings/General');
+    })->name('settings.general');
+
+    Route::get('/settings/branding', function () {
+        return Inertia::render('settings/Branding');
+    })->name('settings.branding');
 });
 
 require __DIR__.'/auth.php';
