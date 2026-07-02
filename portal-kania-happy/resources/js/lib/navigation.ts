@@ -38,10 +38,9 @@ export const navigationItems: NavItem[] = [
     },
     {
         label: 'Senam',
-        href: '#',
+        href: '/gym-classes',
         icon: Dumbbell,
-        routeName: 'senam',
-        disabled: true,
+        routeName: 'gym-classes',
     },
     {
         label: 'Member',

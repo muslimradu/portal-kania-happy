@@ -14,6 +14,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SettingsService::class);
         $this->app->singleton(ActivityLogService::class);
+        $this->app->singleton(\App\Services\GymClassService::class);
     }
 
     public function boot(): void

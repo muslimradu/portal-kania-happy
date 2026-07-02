@@ -19,6 +19,12 @@ class RolePermissionSeeder extends Seeder
             'settings.view',
             'settings.update',
             'activity_logs.view',
+            'gym_classes.view',
+            'gym_classes.create',
+            'gym_classes.update',
+            'gym_classes.delete',
+            'gym_classes.restore',
+            'gym_classes.export',
         ];
 
         foreach ($permissions as $permission) {
