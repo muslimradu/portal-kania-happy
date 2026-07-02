@@ -4,6 +4,13 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title inertia>{{ config('app.name', 'Portal Kania Happy') }}</title>
+
+        <style>
+            :root {
+                --brand-primary: {{ setting('app_primary_color', '#7C3AED') }};
+            }
+        </style>
+
         @routes
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx'])

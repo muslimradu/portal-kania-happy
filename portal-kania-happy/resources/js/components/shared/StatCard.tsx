@@ -15,7 +15,7 @@ interface StatCardProps {
 }
 
 const colorMap = {
-    violet: 'bg-violet-50 text-violet-600',
+    violet: '',
     blue:   'bg-blue-50 text-blue-600',
     green:  'bg-green-50 text-green-600',
     orange: 'bg-orange-50 text-orange-600',
@@ -48,7 +48,13 @@ export default function StatCard({
         <div className="rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-md">
             <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-500">{title}</p>
-                <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', colorMap[color])}>
+                <div
+                    className={cn('flex h-10 w-10 items-center justify-center rounded-xl', colorMap[color])}
+                    style={color === 'violet' ? {
+                        backgroundColor: 'color-mix(in srgb, var(--brand-primary) 10%, white)',
+                        color: 'var(--brand-primary)',
+                    } : undefined}
+                >
                     <Icon className="h-5 w-5" />
                 </div>
             </div>

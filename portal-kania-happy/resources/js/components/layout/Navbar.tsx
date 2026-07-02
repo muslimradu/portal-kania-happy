@@ -66,7 +66,7 @@ export default function Navbar() {
                 <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl p-1.5 pr-3 transition hover:bg-gray-100">
                         <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-violet-100 text-sm font-semibold text-violet-700">
+                        <AvatarFallback className="text-sm font-semibold" style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary) 15%, white)', color: 'var(--brand-primary)' }}>
                                 {initials ?? 'AD'}
                             </AvatarFallback>
                         </Avatar>

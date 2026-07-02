@@ -42,7 +42,7 @@ export default function ConfirmPassword() {
                 <Button
                     type="submit"
                     disabled={processing}
-                    className="w-full rounded-xl bg-violet-600 py-6 text-base font-medium hover:bg-violet-700"
+                    className="w-full rounded-xl py-6 text-base font-medium" style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
                     {processing ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...</>

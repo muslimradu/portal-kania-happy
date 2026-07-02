@@ -176,7 +176,7 @@ export default function General({ generalSettings }: GeneralSettingsProps) {
                         <Button
                             type="submit"
                             disabled={processing || !isDirty}
-                            className="rounded-xl bg-violet-600 hover:bg-violet-700"
+                            className="rounded-xl" style={{ backgroundColor: 'var(--brand-primary)' }}
                         >
                             {processing ? (
                                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>

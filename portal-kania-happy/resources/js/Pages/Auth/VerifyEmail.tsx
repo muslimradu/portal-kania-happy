@@ -19,7 +19,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
         >
             <Head title="Verifikasi Email" />
 
-            <div className="mb-4 rounded-xl bg-violet-50 p-4 text-center">
+            <div className="mb-4 rounded-xl p-4 text-center" style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary) 10%, white)' }}>
                 <Mail className="mx-auto mb-2 h-8 w-8 text-violet-500" />
                 <p className="text-sm text-gray-600">
                     Kami telah mengirimkan link verifikasi ke email Anda.
@@ -37,7 +37,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 <Button
                     type="submit"
                     disabled={processing}
-                    className="w-full rounded-xl bg-violet-600 py-6 text-base font-medium hover:bg-violet-700"
+                    className="w-full rounded-xl py-6 text-base font-medium" style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
                     {processing ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Mengirim...</>

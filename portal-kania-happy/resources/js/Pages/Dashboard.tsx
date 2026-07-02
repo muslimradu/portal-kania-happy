@@ -56,7 +56,7 @@ export default function Dashboard() {
 
             <div className="space-y-6">
                 {/* Header Greeting */}
-                <div className="rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 p-6 text-white shadow-sm">
+                <div className="rounded-2xl p-6 text-white shadow-sm" style={{ background: 'linear-gradient(135deg, var(--brand-primary), color-mix(in srgb, var(--brand-primary) 70%, black))' }}>
                     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div>
                             <h1 className="text-2xl font-bold">

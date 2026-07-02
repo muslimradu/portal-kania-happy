@@ -5,10 +5,10 @@ export default function NotFound() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
             <div className="flex flex-col items-center text-center">
-                <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-violet-100">
-                    <SearchX className="h-12 w-12 text-violet-600" />
+            <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full" style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary) 15%, white)' }}>
+                <SearchX className="h-12 w-12" style={{ color: 'var(--brand-primary)' }} />
                 </div>
-                <h1 className="text-6xl font-bold text-violet-700">404</h1>
+                <h1 className="text-6xl font-bold" style={{ color: 'var(--brand-primary)' }}>404</h1>
                 <p className="mt-2 text-xl font-semibold text-gray-800">
                     Halaman Tidak Ditemukan
                 </p>
@@ -17,7 +17,8 @@ export default function NotFound() {
                 </p>
                 <Link
                     href="/dashboard"
-                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700"
+                    className="mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-white shadow-sm transition"
+                    style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
                     <Home className="h-4 w-4" />
                     Kembali ke Dashboard

@@ -14,7 +14,7 @@ export default function AuthSplitLayout({ children, title, description }: AuthSp
     return (
         <div className="flex min-h-screen">
             {/* Left Side - Gradient Branding */}
-            <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-600 via-violet-700 to-purple-800 p-12 text-white lg:flex">
+            <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden p-12 text-white lg:flex" style={{ background: 'linear-gradient(135deg, var(--brand-primary), color-mix(in srgb, var(--brand-primary) 70%, black))' }}>
                 {/* Decorative background circles */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
@@ -23,7 +23,7 @@ export default function AuthSplitLayout({ children, title, description }: AuthSp
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white font-bold text-violet-700 shadow-lg">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white font-bold shadow-lg" style={{ color: 'var(--brand-primary)' }}>
                             KH
                         </div>
                         <div>

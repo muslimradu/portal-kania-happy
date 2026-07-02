@@ -11,7 +11,8 @@ const sizeClasses = {
 export default function AppLogo({ size = 'md' }: AppLogoProps) {
     return (
         <div
-            className={`flex items-center justify-center rounded-full bg-violet-600 font-bold text-white shadow-lg ${sizeClasses[size]}`}
+            className={`flex items-center justify-center rounded-full font-bold text-white shadow-lg ${sizeClasses[size]}`}
+            style={{ backgroundColor: 'var(--brand-primary)' }}
         >
             KH
         </div>

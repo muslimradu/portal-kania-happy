@@ -14,9 +14,10 @@ import { loginSchema, type LoginFormValues } from '@/lib/validations/auth';
 interface LoginProps {
     status?: string;
     canResetPassword: boolean;
+    rememberedEmail?: string;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status, canResetPassword, rememberedEmail }: LoginProps) {
     useFlashToast();
     const [showPassword, setShowPassword] = useState(false);
     const [processing, setProcessing] = useState(false);
@@ -31,9 +32,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            email: '',
+            email: rememberedEmail ?? '',
             password: '',
-            remember: false,
+            remember: !!rememberedEmail,
         },
     });
 
@@ -137,7 +138,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="text-sm font-medium text-violet-600 transition hover:text-violet-700"
+                            className="text-sm font-medium transition"
+                            style={{ color: 'var(--brand-primary)' }}
                         >
                             Lupa password?
                         </Link>
@@ -147,7 +149,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <Button
                     type="submit"
                     disabled={processing}
-                    className="w-full rounded-xl bg-violet-600 py-6 text-base font-medium shadow-sm transition hover:bg-violet-700"
+                    className="w-full rounded-xl py-6 text-base font-medium shadow-sm transition"
+                    style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
                     {processing ? (
                         <>

@@ -29,14 +29,18 @@ function MobileNavItem({
 
     const rowContent = (
         <div
-            className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
-                isActive || isChildActive
-                    ? 'bg-violet-50 text-violet-700'
-                    : item.disabled
-                      ? 'cursor-not-allowed text-gray-300'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-            )}
+        className={cn(
+            'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
+            isActive || isChildActive
+                ? ''
+                : item.disabled
+                  ? 'cursor-not-allowed text-gray-300'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+        )}
+        style={isActive || isChildActive ? {
+            backgroundColor: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)',
+            color: 'var(--brand-primary)',
+        } : undefined}
         >
             <Icon className="h-5 w-5 shrink-0" />
             <span className="flex-1 truncate">{item.label}</span>
@@ -74,14 +78,18 @@ function MobileNavItem({
 
                         const childContent = (
                             <div
-                                className={cn(
-                                    'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150',
-                                    childActive
-                                        ? 'bg-violet-50 text-violet-700'
-                                        : child.disabled
-                                          ? 'cursor-not-allowed text-gray-300'
-                                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                                )}
+                            className={cn(
+                                'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150',
+                                childActive
+                                    ? ''
+                                    : child.disabled
+                                      ? 'cursor-not-allowed text-gray-300'
+                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                            )}
+                            style={childActive ? {
+                                backgroundColor: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)',
+                                color: 'var(--brand-primary)',
+                            } : undefined}
                             >
                                 <ChildIcon className="h-4 w-4 shrink-0" />
                                 <span className="truncate">{child.label}</span>
