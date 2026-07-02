@@ -1,114 +1,235 @@
 # Portal Kania Happy
 
-Portal internal berbasis Laravel + Inertia (React/TypeScript) dengan UI shadcn/Tailwind. Dokumen ini merangkum progres pengerjaan berdasarkan step-step pada phase awal proyek.
+> **Rumah Sehat & Sanggar Senam**
+
+Sistem manajemen gym & membership berbasis web untuk Portal Kania Happy. Dibangun dengan Laravel 13 + React 19 + Inertia.js.
+
+---
 
 ## Tech Stack
 
-- **Backend:** Laravel 13, PHP ^8.3
-- **Auth:** Laravel Breeze
-- **Otorisasi:** spatie/laravel-permission (roles & permissions)
-- **Frontend:** Inertia.js (React 19 + TypeScript), Tailwind CSS 4
-- **UI Components:** shadcn/ui (Radix/Base UI), Lucide Icons, Sonner (toast)
-- **State/Form:** Zustand, React Hook Form + Zod
-- **Lainnya:** Ziggy (route helper), Vite 8
+| Layer | Technology |
+|-------|-----------|
+| Backend | Laravel 13.17, PHP 8.5.7 |
+| Frontend | React 19, TypeScript, Inertia.js |
+| Database | MySQL 8.x |
+| UI | Tailwind CSS v4, shadcn/ui (Nova preset), Lucide Icons |
+| Auth | Laravel Breeze |
+| Permission | Spatie Laravel Permission 8.1 |
+| Form | React Hook Form + Zod |
+| State | Zustand |
+| Date | Day.js |
 
-## Progres Phase Ini
+---
 
-| Step | Bagian | Isi | Status |
-|---|---|---|---|
-| 1 | Project Setup | Install Laravel 12/13, Breeze, semua package pendukung | ✅ |
-| 2 | Database & Models | Migration, Model, Seeder | ✅ |
-| 3 | Backend Core | SettingsService, Middleware, Exception Handler | ✅ |
-| 4 | Autentikasi | Login page split-screen, logout | x |
-| 5 | Layout Utama | AppLayout, Sidebar, Navbar, Breadcrumb | x |
-| 6 | Global Search UI | Modal CTRL+K (UI saja, belum fungsi pencarian) | x |
-| 7 | Dashboard | Cards, widgets, empty states | x |
-| 8 | Settings Page | General settings + branding | x |
-| 9 | Reusable Components | Semua shared components | x |
-| 10 | Error Pages | 404, 403, 500 | x |
+## Requirements
 
-> Catatan: Global Search (step 6) baru mencakup tampilan modal; logika pencarian backend belum diimplementasikan dan menjadi bagian phase berikutnya.
+- PHP 8.4+
+- Composer 2.x
+- Node.js 20+
+- MySQL 8.x
 
-## Struktur Singkat
+---
+
+## Installation
+
+### 1. Clone repository
+
+```bash
+git clone <repository-url>
+cd portal-kania-happy
+```
+
+### 2. Install dependencies
+
+```bash
+composer install
+npm install --legacy-peer-deps
+```
+
+### 3. Setup environment
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Edit `.env` dan sesuaikan konfigurasi database:
+
+```env
+APP_NAME="Portal Kania Happy"
+APP_URL=http://localhost:8000
+APP_TIMEZONE=Asia/Jakarta
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=portal_kania_happy
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 4. Setup database
+
+```bash
+# Buat database terlebih dahulu di MySQL
+# CREATE DATABASE portal_kania_happy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+php artisan migrate --seed
+```
+
+### 5. Storage link
+
+```bash
+php artisan storage:link
+```
+
+### 6. Jalankan aplikasi
+
+Buka **2 terminal**:
+
+```bash
+# Terminal 1 — Laravel Backend
+php artisan serve
+
+# Terminal 2 — Vite Frontend
+npm run dev
+```
+
+Atau gunakan satu command (menjalankan semua sekaligus):
+
+```bash
+composer dev
+```
+
+Buka browser: **http://localhost:8000**
+
+---
+
+## Default Credentials
+
+| Field | Value |
+|-------|-------|
+| Email | admin@portalkaniah.com |
+| Password | password |
+
+> ⚠️ **Penting:** Ganti password segera setelah login pertama kali melalui halaman Profil.
+
+---
+
+## Struktur Folder
 
 ```
 app/
-  Http/Controllers/      # DashboardController, ProfileController, Auth/*
-  Http/Middleware/       # HandleInertiaRequests, dll.
-  Models/                # User, Setting, ActivityLog
-  Services/              # SettingsService
-  Helpers/               # helpers.php
+├── Http/
+│   ├── Controllers/
+│   │   ├── Auth/                        ← Auth controllers
+│   │   ├── Settings/                    ← General & Branding controllers
+│   │   └── DashboardController.php
+│   ├── Middleware/
+│   │   └── HandleInertiaRequests.php    ← Share global props ke React
+│   └── Requests/
+│       └── Settings/                    ← Form Request validasi
+├── Models/
+│   ├── User.php
+│   ├── Setting.php
+│   └── ActivityLog.php
+├── Services/
+│   ├── SettingsService.php              ← Cache-aware settings service
+│   └── ActivityLogService.php
+└── Helpers/
+    └── helpers.php                      ← Global helper setting()
 
 resources/js/
-  layouts/               # AuthenticatedLayout, GuestLayout
-  pages/                 # Dashboard, Auth/*, Profile/*, errors/*
-  components/            # Komponen Breeze + components/ui (shadcn)
-
-database/
-  migrations/            # users, settings, activity_logs, permission tables
-  seeders/
+├── components/
+│   ├── layout/                          ← Sidebar, Navbar, Breadcrumb, GlobalSearch
+│   ├── shared/                          ← StatCard, DataTable, EmptyState, dll
+│   └── ui/                             ← shadcn/ui base components
+├── hooks/                               ← useFlashToast, useSidebarStore, useGlobalSearch, useDateTime
+├── layouts/                             ← AppLayout, AuthSplitLayout
+├── lib/
+│   ├── navigation.ts                    ← Data menu sidebar terpusat
+│   ├── utils.ts                         ← cn() helper
+│   └── validations/                     ← Zod schemas
+├── pages/
+│   ├── Auth/                            ← Login, ForgotPassword, dll
+│   ├── Dashboard.tsx
+│   ├── Profile/
+│   ├── errors/                          ← 404, 403, 500
+│   └── settings/                        ← General, Branding
+└── types/
+    └── index.d.ts                       ← TypeScript types global
 ```
 
-### Tabel Database
+---
 
-- `users` — data pengguna
-- `settings` — pengaturan umum & branding aplikasi
-- `activity_logs` — log aktivitas pengguna
-- Tabel permission/role dari `spatie/laravel-permission` (`permissions`, `roles`, `model_has_permissions`, `model_has_roles`, `role_has_permissions`)
+## Fitur Phase 1
 
-## Instalasi
+- ✅ Autentikasi — Login, Logout, Remember Me, Forgot Password
+- ✅ Dashboard — Stat cards, widget empty state, real-time clock
+- ✅ Sidebar responsif — Desktop collapse, tablet collapsible, mobile drawer
+- ✅ Global Search — CMD+K, keyboard navigation (↑↓ Enter ESC)
+- ✅ Settings General — Nama app, tagline, timezone, currency, format tanggal
+- ✅ Settings Branding — Primary color dinamis, upload logo & favicon
+- ✅ Dynamic branding — Warna, nama, tagline dari database (tanpa ubah kode)
+- ✅ Toast notifications — Success, Error, Warning, Info via Sonner
+- ✅ Halaman error custom — 404, 403, 500
+- ✅ Reusable components — DataTable, ConfirmDialog, EmptyState, StatCard, dll
+- ✅ Activity Log — Struktur siap, belum diintegrasikan penuh
+- ✅ Role & Permission — Spatie, role Admin, siap multi-role
 
-1. **Clone & masuk ke folder proyek**
-   ```bash
-   git clone <repo-url> portal-kania
-   cd portal-kania
-   ```
+---
 
-2. **Install dependency PHP**
-   ```bash
-   composer install
-   ```
+## Catatan Penting
 
-3. **Install dependency JS**
-   ```bash
-   npm install
-   ```
+### npm install
+Selalu gunakan `--legacy-peer-deps` karena ada konflik peer dependency antara `@vitejs/plugin-react-oxc` dan Vite 8:
 
-4. **Siapkan environment**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+```bash
+npm install --legacy-peer-deps
+```
 
-5. **Siapkan database** (default SQLite)
-   ```bash
-   touch database/database.sqlite
-   php artisan migrate --seed
-   ```
+### maatwebsite/excel
+Package ini tidak diinstall karena belum support PHP 8.5. Akan diganti dengan `openspout/openspout` pada fase laporan.
 
-6. **Jalankan aplikasi**
-   ```bash
-   composer run dev
-   ```
-   Perintah ini menjalankan server PHP, queue listener, log viewer (Pail), dan Vite secara bersamaan. Atau jalankan manual di dua terminal terpisah:
-   ```bash
-   php artisan serve
-   npm run dev
-   ```
+### CSS Variable Brand Color
+Warna brand (`--brand-primary`) di-inject via `app.blade.php` dari database. Semua komponen menggunakan `var(--brand-primary)` bukan hardcoded Tailwind class.
 
-7. Buka `http://localhost:8000` di browser.
+---
 
-## Script Berguna
+## Phase Progress
 
-| Perintah | Keterangan |
-|---|---|
-| `composer run dev` | Jalankan server, queue, pail, dan vite bersamaan |
-| `npm run dev` | Jalankan Vite dev server saja |
-| `npm run build` | Build asset untuk production |
-| `php artisan migrate:fresh --seed` | Reset database & isi ulang seeder |
-| `php artisan pint` | Format kode PHP sesuai standar Laravel |
-| `php artisan test` | Jalankan test suite |
+| Phase | Status | Deskripsi |
+|-------|--------|-----------|
+| **Phase 1** | ✅ Selesai | Foundation, Auth, Dashboard, Settings, Layout |
+| Phase 2 | 🔜 Planned | Member Management |
+| Phase 3 | 🔜 Planned | Kasir & Transaksi |
+| Phase 4 | 🔜 Planned | Senam & Booking Sanggar |
+| Phase 5 | 🔜 Planned | Laporan & Export |
+
+---
+
+## Development Commands
+
+```bash
+# Jalankan semua (server + vite + queue + logs)
+composer dev
+
+# Migration ulang dari awal
+php artisan migrate:fresh --seed
+
+# Clear semua cache
+php artisan config:clear && php artisan cache:clear && php artisan route:clear
+
+# TypeScript check
+npx tsc --noEmit
+
+# Build production
+npm run build
+```
+
+---
 
 ## Lisensi
 
-Proyek internal — hak cipta dipegang oleh pemilik proyek.
+Private — Portal Kania Happy © 2026
