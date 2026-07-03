@@ -7,17 +7,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class GymClass extends Model
+class MembershipPackage extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $fillable = [
         'name',
         'price',
-        'color_label',
-        'icon',
+        'description',
+        'expired_duration',
+        'expired_type',
         'is_active',
         'created_by',
         'updated_by',
@@ -26,8 +28,9 @@ class GymClass extends Model
     protected function casts(): array
     {
         return [
-            'price'     => 'decimal:2',
-            'is_active' => 'boolean',
+            'price'            => 'decimal:2',
+            'is_active'        => 'boolean',
+            'expired_duration' => 'integer',
         ];
     }
 
@@ -36,19 +39,18 @@ class GymClass extends Model
         return ['uuid'];
     }
 
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
     public function getRouteKeyName(): string
     {
         return 'uuid';
     }
-    public function scopeSearch($query, ?string $search)
+
+    public function details(): HasMany
     {
-        if ($search) {
-            $query->where('name', 'like', "%{$search}%");
-        }
-        return $query;
+        return $this->hasMany(MembershipPackageDetail::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

@@ -25,6 +25,12 @@ class RolePermissionSeeder extends Seeder
             'gym_classes.delete',
             'gym_classes.restore',
             'gym_classes.export',
+            'membership_packages.view',
+            'membership_packages.create',
+            'membership_packages.update',
+            'membership_packages.delete',
+            'membership_packages.restore',
+            'membership_packages.export',
         ];
 
         foreach ($permissions as $permission) {

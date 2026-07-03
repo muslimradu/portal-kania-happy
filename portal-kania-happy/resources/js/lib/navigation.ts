@@ -44,10 +44,9 @@ export const navigationItems: NavItem[] = [
     },
     {
         label: 'Member',
-        href: '#',
+        href: '/membership-packages',
         icon: Users,
         routeName: 'member',
-        disabled: true,
     },
     {
         label: 'Booking Sanggar',

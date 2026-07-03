@@ -8,20 +8,21 @@ use App\Http\Controllers\Settings\GeneralSettingsController;
 use App\Http\Controllers\Settings\BrandingSettingsController;
 use App\Http\Controllers\GymClass\GymClassController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\MembershipPackage\MembershipPackageController;
 
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
     return redirect()->route('login');
-    })->name('welcome');
+})->name('welcome');
 
-    Route::middleware(['auth', 'verified'])->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
@@ -29,16 +30,25 @@ Route::get('/', function () {
         Route::patch('/general', [GeneralSettingsController::class, 'update'])->name('general.update');
         Route::get('/branding', [BrandingSettingsController::class, 'index'])->name('branding');
         Route::patch('/branding', [BrandingSettingsController::class, 'update'])->name('branding.update');
+    });
 
     // Gym Classes
     Route::prefix('gym-classes')->name('gym-classes.')->group(function () {
         Route::get('/', [GymClassController::class, 'index'])->name('index');
         Route::post('/', [GymClassController::class, 'store'])->name('store');
-        Route::patch('/{gym_class}', [GymClassController::class, 'update'])->name('update');
-        Route::delete('/{gym_class}', [GymClassController::class, 'destroy'])->name('destroy');
+        Route::patch('/{gym_class:uuid}', [GymClassController::class, 'update'])->name('update');
+        Route::delete('/{gym_class:uuid}', [GymClassController::class, 'destroy'])->name('destroy');
         Route::patch('/{uuid}/restore', [GymClassController::class, 'restore'])->name('restore');
-});
     });
+
+    // Membership Packages
+Route::prefix('membership-packages')->name('membership-packages.')->group(function () {
+    Route::get('/', [MembershipPackageController::class, 'index'])->name('index');
+    Route::post('/', [MembershipPackageController::class, 'store'])->name('store');
+    Route::patch('/{membershipPackage}', [MembershipPackageController::class, 'update'])->name('update');
+    Route::delete('/{membershipPackage}', [MembershipPackageController::class, 'destroy'])->name('destroy');
+    Route::patch('/{uuid}/restore', [MembershipPackageController::class, 'restore'])->name('restore');
+});
 });
 
 require __DIR__.'/auth.php';
