@@ -1,12 +1,11 @@
-# Railway MUST use repo root (Root Directory = empty). Dockerfile + nixpacks.toml live here.
+# Railway MUST use repo root (Root Directory = empty).
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
-preDeployCommand = "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan storage:link"
+startCommand = "/usr/local/bin/entrypoint.sh"
 healthcheckPath = "/up"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
