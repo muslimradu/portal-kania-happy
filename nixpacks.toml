@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "php83Extensions.gd"]
+
+[variables]
+NPM_CONFIG_LEGACY_PEER_DEPS = "true"

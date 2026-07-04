@@ -172,6 +172,126 @@ php artisan view:cache
 
 ---
 
+## Deploy ke Railway
+
+Repo sudah include `railway.toml` dan `nixpacks.toml`. Connect GitHub → Railway → MySQL → set variables → deploy.
+
+### 1. Buat project
+
+1. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo**
+2. Pilih repo `portal-kania-happy`
+3. **+ New** → **Database** → **MySQL**
+
+### 2. Environment variables (service Web)
+
+| Variable | Value |
+|----------|-------|
+| `APP_NAME` | `Portal Kania Happy` |
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `APP_KEY` | `base64:...` *(lokal: `php artisan key:generate --show`)* |
+| `APP_URL` | `https://<domain>.up.railway.app` |
+| `APP_TIMEZONE` | `Asia/Jakarta` |
+| `DB_CONNECTION` | `mysql` |
+| `DB_HOST` | `${{MySQL.MYSQLHOST}}` |
+| `DB_PORT` | `${{MySQL.MYSQLPORT}}` |
+| `DB_DATABASE` | `${{MySQL.MYSQLDATABASE}}` |
+| `DB_USERNAME` | `${{MySQL.MYSQLUSER}}` |
+| `DB_PASSWORD` | `${{MySQL.MYSQLPASSWORD}}` |
+| `SESSION_DRIVER` | `database` |
+| `SESSION_SECURE_COOKIE` | `true` |
+| `CACHE_STORE` | `database` |
+| `QUEUE_CONNECTION` | `database` |
+| `FILESYSTEM_DISK` | `local` *(lihat Volume/S3 di bawah)* |
+| `LOG_CHANNEL` | `stderr` |
+| `LOG_LEVEL` | `warning` |
+
+> `railway.toml` sudah mengatur build, start, migrate, dan health check `/up`.
+
+### 3. Generate domain
+
+**Settings → Networking → Generate Domain** → copy URL HTTPS → update `APP_URL` → redeploy.
+
+### 4. Seed pertama kali (via Railway CLI)
+
+```bash
+railway link
+railway run php artisan db:seed --force
+```
+
+Login default: `admin@portalkaniah.com` / `password`
+
+### 5. Post-deploy
+
+- [ ] Ganti password admin
+- [ ] Settings → Branding (logo/favicon)
+- [ ] Konfigurasi Transfer & QRIS
+- [ ] Input master data
+- [ ] Test login, kasir, booking, export
+
+---
+
+### Hal penting di Railway
+
+#### HTTPS & Proxy
+
+Sudah dikonfigurasi di codebase:
+
+- `bootstrap/app.php` → `trustProxies(at: '*')`
+- `AppServiceProvider` → `URL::forceScheme('https')` saat production
+
+Set juga `SESSION_SECURE_COOKIE=true` di Railway variables.
+
+#### Storage ephemeral (upload logo)
+
+Filesystem Railway **tidak permanen** — upload branding bisa hilang saat redeploy.
+
+**Opsi A — Railway Volume (disarankan untuk logo/favicon):**
+
+1. Service Web → **Settings → Volumes**
+2. Add Volume, mount path: `/app/storage/app/public`
+3. Tetap `FILESYSTEM_DISK=local`
+
+**Opsi B — S3 / Cloudflare R2:**
+
+```env
+FILESYSTEM_DISK=s3
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_DEFAULT_REGION=...
+AWS_BUCKET=...
+AWS_URL=https://...   # opsional, untuk R2/custom endpoint
+```
+
+#### Health check
+
+Route `/up` (Laravel built-in) — sudah di `railway.toml` sebagai `healthcheckPath`.
+
+#### Log
+
+Set `LOG_CHANNEL=stderr` agar log muncul di Railway **Deploy Logs**.
+
+#### Redeploy / update
+
+Push ke `main` → Railway auto-deploy. Migrate otomatis via `preDeployCommand` di `railway.toml`.
+
+```bash
+git push origin main
+```
+
+#### Troubleshooting
+
+| Masalah | Solusi |
+|---------|--------|
+| 500 / blank page | Cek Deploy Logs; pastikan `APP_KEY` terisi |
+| Vite manifest not found | Pastikan build command jalan (`npm run build`) |
+| DB connection error | Cek reference variable MySQL |
+| CSRF / 419 | Pastikan `APP_URL` HTTPS benar |
+| Logo hilang setelah redeploy | Pasang Volume atau S3 |
+| CSS/JS tidak load | Redeploy; cek `public/build/` ada di build log |
+
+---
+
 ## Manual Testing Checklist
 
 - [ ] Login / Logout / Remember Me / Forgot Password
