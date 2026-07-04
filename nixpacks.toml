@@ -1,5 +1,12 @@
-[phases.setup]
-nixPkgs = ["nodejs_20", "php83Extensions.gd"]
+# Jangan override [phases.setup] nixPkgs — itu menghapus PHP & Composer bawaan Nixpacks.
+# Nixpacks auto-detect Laravel dari composer.json + package.json.
 
 [variables]
 NPM_CONFIG_LEGACY_PEER_DEPS = "true"
+NIXPACKS_PHP_ROOT_DIR = "/app/public"
+
+[phases.build]
+cmds = [
+    "npm ci --legacy-peer-deps",
+    "npm run build",
+]
