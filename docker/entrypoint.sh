@@ -1,6 +1,4 @@
 #!/bin/sh
-set -e
-
 cd /app
 
 if [ -z "${APP_KEY:-}" ]; then
@@ -8,18 +6,35 @@ if [ -z "${APP_KEY:-}" ]; then
     exit 1
 fi
 
+case "${DB_HOST:-}" in
+    *'${{'*)
+        echo "[entrypoint] ERROR: DB_HOST looks unresolved (${DB_HOST})."
+        echo "[entrypoint] Use Railway Reference, not literal \${{MySQL.MYSQLHOST}} text."
+        exit 1
+        ;;
+esac
+
 mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-
+php artisan config:clear 2>/dev/null || true
+php artisan route:clear 2>/dev/null || true
+php artisan view:clear 2>/dev/null || true
 php artisan storage:link --force 2>/dev/null || true
 
-if [ -n "${DB_HOST:-}" ] || [ "${DB_CONNECTION:-}" = "sqlite" ]; then
-    php artisan migrate --force || echo "[entrypoint] WARN: migrate failed (check DB_* variables)"
+echo "[entrypoint] PHP $(php -r 'echo PHP_VERSION;')"
+echo "[entrypoint] PORT=${PORT:-8080}"
+echo "[entrypoint] DB_CONNECTION=${DB_CONNECTION:-not set}"
+echo "[entrypoint] DB_HOST=${DB_HOST:-not set}"
+
+# Migrate in background so healthcheck /up can respond immediately.
+if [ -n "${DB_HOST:-}" ] && [ "${DB_CONNECTION:-mysql}" != "sqlite" ]; then
+    (
+        sleep 3
+        echo "[entrypoint] Running migrations..."
+        timeout 120 php artisan migrate --force 2>&1 || echo "[entrypoint] WARN: migrate failed (check DB_* variables)"
+    ) &
 fi
 
-echo "[entrypoint] Starting on port ${PORT:-8080}"
+echo "[entrypoint] Starting server on 0.0.0.0:${PORT:-8080}"
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"
