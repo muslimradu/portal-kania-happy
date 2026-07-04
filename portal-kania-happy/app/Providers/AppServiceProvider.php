@@ -17,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\GymClassService::class);
         $this->app->singleton(\App\Services\MembershipPackageService::class);
         $this->app->singleton(\App\Services\PaymentConfigurationService::class);
+        $this->app->singleton(\App\Services\MemberService::class);
     }
 
     public function boot(): void

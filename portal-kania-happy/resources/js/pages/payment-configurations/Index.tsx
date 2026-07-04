@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Plus, QrCode, Building2, CreditCard } from 'lucide-react';
+import { Plus, QrCode, Building2 } from 'lucide-react';
 import AppLayout from '@/layouts/AppLayout';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
@@ -146,12 +146,14 @@ export default function PaymentConfigurationIndex({ qrisList, transferList, acti
             </div>
 
             <QrisFormDialog
+                key={editQris?.uuid ?? 'new-qris'}
                 open={qrisFormOpen}
                 onOpenChange={setQrisFormOpen}
                 qris={editQris}
             />
 
             <TransferFormDialog
+                key={editTransfer?.uuid ?? 'new-transfer'}
                 open={transferFormOpen}
                 onOpenChange={setTransferFormOpen}
                 transfer={editTransfer}

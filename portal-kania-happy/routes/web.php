@@ -10,6 +10,7 @@ use App\Http\Controllers\GymClass\GymClassController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MembershipPackage\MembershipPackageController;
 use App\Http\Controllers\PaymentConfiguration\PaymentConfigurationController;
+use App\Http\Controllers\Member\MemberController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -61,6 +62,16 @@ Route::prefix('settings/payment')->name('payment-configurations.')->group(functi
     Route::delete('/{paymentConfiguration}', [PaymentConfigurationController::class, 'destroy'])->name('destroy');
     Route::patch('/{uuid}/restore', [PaymentConfigurationController::class, 'restore'])->name('restore');
     Route::patch('/qris/{paymentConfiguration}/activate', [PaymentConfigurationController::class, 'activateQris'])->name('qris.activate');
+});
+
+// Members
+Route::prefix('members')->name('members.')->group(function () {
+    Route::get('/', [MemberController::class, 'index'])->name('index');
+    Route::post('/', [MemberController::class, 'store'])->name('store');
+    Route::get('/{member}', [MemberController::class, 'show'])->name('show');
+    Route::patch('/{member}', [MemberController::class, 'update'])->name('update');
+    Route::delete('/{member}', [MemberController::class, 'destroy'])->name('destroy');
+    Route::patch('/{uuid}/restore', [MemberController::class, 'restore'])->name('restore');
 });
 });
 

@@ -78,7 +78,7 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key'       => 'app_phone_prefix',
-                'value'     => '628',
+                'value'     => '62',
                 'type'      => 'string',
                 'group'     => 'general',
                 'label'     => 'Phone Prefix',

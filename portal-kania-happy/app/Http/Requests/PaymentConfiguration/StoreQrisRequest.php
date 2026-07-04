@@ -15,10 +15,18 @@ class StoreQrisRequest extends FormRequest
 
     public function rules(): array
     {
+        $isEdit = $this->route('paymentConfiguration') !== null;
+
         return [
             'name'            => ['required', 'string', 'max:100'],
             'qris_type'       => ['required', 'in:upload,url'],
-            'qris_image_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048', 'required_if:qris_type,upload'],
+            'qris_image_file' => [
+                'nullable',
+                'image',
+                'mimes:png,jpg,jpeg',
+                'max:2048',
+                $isEdit ? 'sometimes' : 'required_if:qris_type,upload',
+            ],
             'qris_url'        => ['nullable', 'string', 'url', 'required_if:qris_type,url'],
             'is_active'       => ['boolean'],
         ];

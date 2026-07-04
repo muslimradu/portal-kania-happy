@@ -45,10 +45,16 @@ export const navigationItems: NavItem[] = [
     },
     {
         label: 'Membership',
-        href: '/membership-packages',
+        href: '/members',
         icon: Users,
         routeName: 'member',
         children: [
+            {
+                label: 'Daftar Member',
+                href: '/members',
+                icon: Users,
+                routeName: 'members.index',
+            },
             {
                 label: 'Paket Membership',
                 href: '/membership-packages',

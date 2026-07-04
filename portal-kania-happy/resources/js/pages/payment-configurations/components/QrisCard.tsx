@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
-import { Pencil, Trash2, RotateCcw, CheckCircle, XCircle } from 'lucide-react';
+import { Pencil, Trash2, RotateCcw, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
