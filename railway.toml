@@ -1,4 +1,8 @@
-# Deploy config — Dockerfile auto-detected at repo root; nixpacks.toml pins PHP 8.4 as fallback.
+# Railway MUST use repo root (Root Directory = empty). Dockerfile + nixpacks.toml live here.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"

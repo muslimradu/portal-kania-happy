@@ -1,9 +1,9 @@
-# Nixpacks fallback — Symfony 8.1 requires PHP >= 8.4.1.
+# Fallback when Railway uses Nixpacks instead of Dockerfile.
 
 [variables]
 NIXPACKS_PHP_VERSION = "8.4"
 NIXPACKS_PHP_ROOT_DIR = "/app/public"
-NIXPACKS_INSTALL_CMD = "mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx && composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs && npm ci --legacy-peer-deps"
+NIXPACKS_INSTALL_CMD = "mkdir -p /var/log/nginx /var/cache/nginx && composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs && npm ci --legacy-peer-deps"
 NIXPACKS_BUILD_CMD = "npm run build"
 COMPOSER_ALLOW_SUPERUSER = "1"
 NPM_CONFIG_LEGACY_PEER_DEPS = "true"

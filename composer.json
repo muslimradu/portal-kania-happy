@@ -6,7 +6,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.4",
+        "php": ">=8.4.1",
         "inertiajs/inertia-laravel": "^3.1",
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.0",
@@ -44,6 +44,7 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php -r \"echo '[build] PHP '.PHP_VERSION.PHP_EOL; if (version_compare(PHP_VERSION, '8.4.1', '<')) { fwrite(STDERR, '[build] ERROR: Symfony 8.1 requires PHP >= 8.4.1, got '.PHP_VERSION.PHP_EOL.'[build] Fix Railway: Settings → Source → Root Directory must be EMPTY (repo root), then Deploy latest commit from main.'.PHP_EOL); exit(1); }\"",
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
