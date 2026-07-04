@@ -1,18 +1,17 @@
-# Nixpacks — Laravel 13 membutuhkan PHP 8.3+ (Symfony 8 gagal parse di PHP 8.1/8.2 lama).
+# Fallback only — production deploy uses Dockerfile (PHP 8.4 required by Symfony 8.1).
 
 [variables]
-NIXPACKS_PHP_VERSION = "8.3"
+NIXPACKS_PHP_VERSION = "8.4"
 NIXPACKS_PHP_ROOT_DIR = "/app/public"
 NPM_CONFIG_LEGACY_PEER_DEPS = "true"
 COMPOSER_ALLOW_SUPERUSER = "1"
 
 [phases.install]
 cmds = [
+    "mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx",
     "composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs",
+    "npm ci --legacy-peer-deps",
 ]
 
 [phases.build]
-cmds = [
-    "npm ci --legacy-peer-deps",
-    "npm run build",
-]
+cmds = ["npm run build"]
