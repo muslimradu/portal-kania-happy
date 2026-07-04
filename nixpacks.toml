@@ -1,9 +1,15 @@
-# Jangan override [phases.setup] nixPkgs — itu menghapus PHP & Composer bawaan Nixpacks.
-# Nixpacks auto-detect Laravel dari composer.json + package.json.
+# Nixpacks — Laravel 13 membutuhkan PHP 8.3+ (Symfony 8 gagal parse di PHP 8.1/8.2 lama).
 
 [variables]
-NPM_CONFIG_LEGACY_PEER_DEPS = "true"
+NIXPACKS_PHP_VERSION = "8.3"
 NIXPACKS_PHP_ROOT_DIR = "/app/public"
+NPM_CONFIG_LEGACY_PEER_DEPS = "true"
+COMPOSER_ALLOW_SUPERUSER = "1"
+
+[phases.install]
+cmds = [
+    "composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs",
+]
 
 [phases.build]
 cmds = [
