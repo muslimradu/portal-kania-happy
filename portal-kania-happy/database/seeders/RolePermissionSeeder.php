@@ -31,6 +31,11 @@ class RolePermissionSeeder extends Seeder
             'membership_packages.delete',
             'membership_packages.restore',
             'membership_packages.export',
+            'payment_configurations.view',
+            'payment_configurations.create',
+            'payment_configurations.update',
+            'payment_configurations.delete',
+            'payment_configurations.restore',
         ];
 
         foreach ($permissions as $permission) {

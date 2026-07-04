@@ -45,8 +45,8 @@ export default function PackageFormDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="max-w-4xl max-h-[90vh] overflow-y-auto"
-                style={{ backgroundColor: 'white' }}
+                className="max-h-[90vh] overflow-y-auto"
+                style={{ backgroundColor: 'white', width: '90vw', maxWidth: '900px' }}
             >
                 <DialogHeader>
                     <DialogTitle>

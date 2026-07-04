@@ -16,9 +16,9 @@ interface GymClassFormProps {
 }
 
 const SUGGESTED_COLORS = [
-    '#7C3AED', '#2563EB', '#059669', '#D97706',
-    '#DC2626', '#DB2777', '#0891B2', '#4F46E5',
-    '#EA580C', '#65A30D', '#0284C7', '#7C3AED',
+    '#7C3AED', '#C8A2C8', '#D2AFFF', '#D97706',
+    '#AA98A9', '#DB2777', '#0891B2', '#4F46E5',
+    '#EA580C', '#65A30D', '#0284C7', '#0F172A',
 ];
 
 const SUGGESTED_ICONS = [
@@ -132,7 +132,7 @@ export default function GymClassForm({ gymClass, onSubmit, processing }: GymClas
                 {/* Icon */}
                 <div className="space-y-2">
                     <Label>Icon</Label>
-                    <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
+                    <div className="grid grid-cols-10 gap-1.5 sm:grid-cols-14">
                         {SUGGESTED_ICONS.map((iconName) => {
                             const Icon = (LucideIcons as unknown as Record<string, React.ComponentType<any>>)[iconName];
                             if (!Icon) return null;
@@ -142,7 +142,7 @@ export default function GymClassForm({ gymClass, onSubmit, processing }: GymClas
                                     type="button"
                                     onClick={() => setValue('icon', iconName)}
                                     title={iconName}
-                                    className={`flex aspect-square items-center justify-center rounded-xl border-2 transition hover:scale-105 ${
+                                    className={`flex h-10 w-10 items-center justify-center rounded-xl border-2 transition hover:scale-105 ${
                                         values.icon === iconName
                                             ? 'border-current'
                                             : 'border-gray-100 bg-gray-50 hover:border-gray-200'
@@ -153,7 +153,7 @@ export default function GymClassForm({ gymClass, onSubmit, processing }: GymClas
                                     } : {}}
                                 >
                                     <Icon
-                                        className="h-5 w-5"
+                                        className="h-4 w-4"
                                         style={{ color: values.icon === iconName ? values.color_label : '#6b7280' }}
                                     />
                                 </button>

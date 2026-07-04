@@ -10,6 +10,7 @@ import {
     SlidersHorizontal,
     Palette,
     CreditCard,
+    Package,
     type LucideIcon,
 } from 'lucide-react';
 
@@ -43,10 +44,18 @@ export const navigationItems: NavItem[] = [
         routeName: 'gym-classes',
     },
     {
-        label: 'Member',
+        label: 'Membership',
         href: '/membership-packages',
         icon: Users,
         routeName: 'member',
+        children: [
+            {
+                label: 'Paket Membership',
+                href: '/membership-packages',
+                icon: Package,
+                routeName: 'membership-packages',
+            },
+        ],
     },
     {
         label: 'Booking Sanggar',
@@ -89,10 +98,9 @@ export const navigationItems: NavItem[] = [
             },
             {
                 label: 'Payment Configuration',
-                href: '#',
+                href: '/settings/payment',
                 icon: CreditCard,
                 routeName: 'settings.payment',
-                disabled: true,
             },
         ],
     },

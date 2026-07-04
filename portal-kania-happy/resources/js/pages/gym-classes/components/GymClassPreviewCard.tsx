@@ -17,19 +17,19 @@ function formatCurrency(amount: number): string {
 }
 
 function resolveIcon(iconName: string): React.ReactNode {
-    // Cek apakah emoji (unicode)
     if (/\p{Emoji}/u.test(iconName)) {
-        return <span className="text-2xl">{iconName}</span>;
+        return <span className="text-lg">{iconName}</span>;
     }
+
 
     // Cek apakah Lucide icon
     const Icon = (LucideIcons as unknown as Record<string, React.ComponentType<any>>)[iconName];
     if (Icon) {
-        return <Icon className="h-6 w-6 text-white" />;
+        return <Icon className="h-5 w-5 text-white" />;
     }
 
     // Fallback
-    return <span className="text-2xl">💪</span>;
+    return <span className="text-lg">💪</span>;
 }
 
 export default function GymClassPreviewCard({
@@ -43,7 +43,7 @@ export default function GymClassPreviewCard({
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <div className="flex items-start gap-4">
                 <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm"
                     style={{ backgroundColor: color }}
                 >
                     {resolveIcon(icon)}

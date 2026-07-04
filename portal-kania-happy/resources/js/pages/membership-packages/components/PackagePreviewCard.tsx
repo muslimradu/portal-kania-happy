@@ -43,7 +43,7 @@ export default function PackagePreviewCard({
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <div className="mb-4 border-b border-gray-50 pb-4">
                 <h3 className="font-bold text-gray-900">{name || 'Nama Paket'}</h3>
-                <p className="mt-1 text-lg font-semibold" style={{ color: 'var(--brand-primary)' }}>
+                <p className="mt-1 truncate text-base font-semibold" style={{ color: 'var(--brand-primary)' }}>
                     {formatCurrency(price || 0)}
                 </p>
                 <p className="mt-1 text-xs text-gray-400">

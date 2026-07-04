@@ -37,7 +37,6 @@ export default function PackageForm({ pkg, gymClasses, onSubmit, processing }: P
         defaultValues: {
             name:             pkg?.name             ?? '',
             price:            pkg?.price            ?? 0,
-            description:      pkg?.description      ?? null,
             expired_type:     pkg?.expired_type     ?? 'manual',
             expired_duration: pkg?.expired_duration ?? null,
             is_active:        pkg?.is_active        ?? true,
@@ -95,19 +94,6 @@ export default function PackageForm({ pkg, gymClasses, onSubmit, processing }: P
                         {...register('price', { valueAsNumber: true })}
                     />
                     {errors.price && <p className="text-sm text-red-600">{errors.price.message}</p>}
-                </div>
-
-                {/* Deskripsi */}
-                <div className="space-y-2">
-                    <Label htmlFor="description">Deskripsi (opsional)</Label>
-                    <textarea
-                        id="description"
-                        rows={3}
-                        placeholder="Deskripsi singkat paket membership..."
-                        className="w-full rounded-xl border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                        {...register('description')}
-                    />
-                    {errors.description && <p className="text-sm text-red-600">{errors.description.message}</p>}
                 </div>
 
                 {/* Expired */}
@@ -232,13 +218,13 @@ export default function PackageForm({ pkg, gymClasses, onSubmit, processing }: P
 
                                         {/* Quota Input */}
                                         {!isUnlimited && (
-                                          <Input
-                                                type="number"
-                                                min="1"
-                                                placeholder="Kuota"
-                                                className="w-20 rounded-lg text-sm"
-                                                {...register(`details.${index}.quota`, { valueAsNumber: true })}
-                                            />
+                                            <Input
+                                            type="number"
+                                            min="1"
+                                            placeholder="Kuota"
+                                            className="w-24 rounded-lg text-sm"
+                                            {...register(`details.${index}.quota`, { valueAsNumber: true })}
+                                        />
                                         )}
 
                                         {/* Remove */}
