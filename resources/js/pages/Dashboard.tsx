@@ -21,7 +21,6 @@ import SimplePieChart from '@/components/shared/charts/SimplePieChart';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { useDateTime } from '@/hooks/useDateTime';
-import { usePollingReload } from '@/hooks/usePollingReload';
 import { formatCurrency, formatDateShort } from '@/lib/format';
 import { PAYMENT_STATUS_LABELS, STATUS_LABELS, formatTime, paymentBadgeStyle, statusBadgeStyle } from '@/pages/bookings/bookingHelpers';
 import type { PageProps } from '@/types';
@@ -71,8 +70,6 @@ export default function Dashboard() {
         props as unknown as DashboardProps;
     const { auth } = props;
     const { date, time } = useDateTime();
-
-    usePollingReload(['stats', 'recent_activity', 'upcoming_expired_members', 'recent_bookings', 'revenue_last_7_days', 'top_classes', 'payment_distribution'], 20000);
 
     const firstName = auth.user?.name?.split(' ')[0] ?? 'Admin';
 
