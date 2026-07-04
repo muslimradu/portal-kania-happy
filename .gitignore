@@ -1,0 +1,90 @@
+# Laravel
+/vendor/
+/node_modules/
+/public/build/
+/public/hot
+/public/storage
+/public/fonts-manifest.dev.json
+/storage/*.key
+/storage/pail
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+
+# PHPUnit / Testing
+.phpunit.result.cache
+.phpunit.cache
+/coverage/
+/.tmp_test*/
+
+# Environment
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+
+# Database (local SQLite)
+/database/*.sqlite
+/database/*.sqlite-journal
+/database/*.sqlite-wal
+/database/*.sqlite-shm
+
+# Composer
+/auth.json
+
+# NPM / Yarn / PNPM
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# IDE / Editor
+/.idea/
+/.vscode/
+/.nova/
+/.zed/
+/.codex/
+/.cursor/
+/.fleet/
+*.swp
+*.swo
+*~
+.phpactor.json
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+/storage/logs/*.log
+
+# Homestead / Vagrant
+Homestead.json
+Homestead.yaml
+/.vagrant/
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Build artifacts
+*.tsbuildinfo
+
+# Laravel Sail
+docker-compose.override.yml
+
+# Optional: keep local dev tools config out of repo
+/.phpunit.cache
