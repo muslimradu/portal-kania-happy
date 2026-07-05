@@ -41,7 +41,7 @@ function NavItemRow({
                 ? 'bg-opacity-10'
                 : item.disabled
                   ? 'cursor-not-allowed text-gray-300'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-100 dark:hover:bg-gray-800 dark:hover:text-white',
             !isOpen && 'justify-center',
         )}
         style={isActive || isChildActive ? {
@@ -104,7 +104,7 @@ function NavItemRow({
         <div key={item.label}>
             {wrappedRow}
             {hasChildren && isOpen && expanded && (
-                <div className="ml-4 mt-1 space-y-1 border-l border-gray-100 pl-3">
+                <div className="ml-4 mt-1 space-y-1 border-l border-gray-100 pl-3 dark:border-gray-800">
                     {item.children!.map((child) => {
                         const childActive = isUrlActive(url, child.href);
                         const ChildIcon = child.icon;
@@ -117,7 +117,7 @@ function NavItemRow({
                                     ? ''
                                     : child.disabled
                                       ? 'cursor-not-allowed text-gray-300'
-                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-100 dark:hover:bg-gray-800 dark:hover:text-white',
                             )}
                             style={childActive ? {
                                 backgroundColor: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)',
@@ -158,16 +158,16 @@ export default function Sidebar() {
     return (
         <aside
             className={cn(
-                'sticky top-0 hidden h-screen flex-col border-r border-gray-200 bg-white transition-all duration-200 md:flex',
+                'sticky top-0 hidden h-screen flex-col border-r border-gray-200 bg-white transition-all duration-200 dark:border-gray-800 dark:bg-gray-950 md:flex',
                 isOpen ? 'w-64' : 'w-20',
             )}
         >
             {/* Logo & Brand */}
-            <div className="flex h-16 items-center gap-3 border-b border-gray-100 px-4">
+            <div className="flex h-16 items-center gap-3 border-b border-gray-100 px-4 dark:border-gray-800">
                 <AppLogo size="sm" />
                 {isOpen && (
                     <div className="overflow-hidden">
-                        <p className="truncate text-sm font-bold text-gray-900">
+                        <p className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
                             {settings?.app_name ?? 'Portal Kania Happy'}
                         </p>
                         <p className="truncate text-xs text-gray-400">
@@ -190,13 +190,13 @@ export default function Sidebar() {
             </nav>
 
             {/* Logout */}
-            <div className="border-t border-gray-100 p-3">
+            <div className="border-t border-gray-100 p-3 dark:border-gray-800">
                 <Link
                     href={route('logout')}
                     method="post"
                     as="button"
                     className={cn(
-                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-all duration-150 hover:bg-red-50',
+                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-all duration-150 hover:bg-red-50 dark:hover:bg-red-950/30',
                         !isOpen && 'justify-center',
                     )}
                 >
@@ -208,7 +208,7 @@ export default function Sidebar() {
             {/* Collapse Toggle */}
             <button
                 onClick={toggle}
-                className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition hover:bg-gray-50"
+                className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
             >
                 <ChevronLeft
                     className={cn(

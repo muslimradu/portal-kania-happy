@@ -40,7 +40,7 @@ function MobileNavItem({
                 ? ''
                 : item.disabled
                   ? 'cursor-not-allowed text-gray-300'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-100 dark:hover:bg-gray-800 dark:hover:text-white',
         )}
         style={isActive || isChildActive ? {
             backgroundColor: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)',
@@ -75,7 +75,7 @@ function MobileNavItem({
             )}
 
             {hasChildren && expanded && (
-                <div className="ml-4 mt-1 space-y-1 border-l border-gray-100 pl-3">
+                <div className="ml-4 mt-1 space-y-1 border-l border-gray-100 pl-3 dark:border-gray-800">
                     {item.children!.map((child) => {
                         const childActive = isUrlActive(url, child.href);
                         const ChildIcon = child.icon;
@@ -88,7 +88,7 @@ function MobileNavItem({
                                     ? ''
                                     : child.disabled
                                       ? 'cursor-not-allowed text-gray-300'
-                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-100 dark:hover:bg-gray-800 dark:hover:text-white',
                             )}
                             style={childActive ? {
                                 backgroundColor: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)',
@@ -128,11 +128,11 @@ export default function MobileSidebar() {
 
     return (
         <Sheet open={isMobileOpen} onOpenChange={setMobileOpen}>
-            <SheetContent side="left" className="w-72 p-0">
-                <div className="flex h-16 items-center gap-3 border-b border-gray-100 px-4">
+            <SheetContent side="left" className="w-72 border-gray-200 bg-white p-0 dark:border-gray-800 dark:bg-gray-950">
+                <div className="flex h-16 items-center gap-3 border-b border-gray-100 px-4 dark:border-gray-800">
                     <AppLogo size="sm" />
                     <div>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
                             {settings?.app_name ?? 'Portal Kania Happy'}
                         </p>
                         <p className="text-xs text-gray-400">
@@ -152,12 +152,12 @@ export default function MobileSidebar() {
                     ))}
                 </nav>
 
-                <div className="border-t border-gray-100 p-3">
+                <div className="border-t border-gray-100 p-3 dark:border-gray-800">
                     <Link
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-all duration-150 hover:bg-red-50"
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-all duration-150 hover:bg-red-50 dark:hover:bg-red-950/30"
                     >
                         <LogOut className="h-5 w-5 shrink-0" />
                         <span>Logout</span>

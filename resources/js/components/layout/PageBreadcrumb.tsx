@@ -17,7 +17,7 @@ export default function PageBreadcrumb({ items }: PageBreadcrumbProps) {
     const autoItems: BreadcrumbItem[] = items ?? generateFromUrl(url);
 
     return (
-        <nav className="flex items-center gap-1.5 text-sm text-gray-500">
+        <nav className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
             <Link href="/dashboard" className="flex items-center transition" style={{ color: 'inherit' }} onMouseEnter={e => (e.currentTarget.style.color = 'var(--brand-primary)')} onMouseLeave={e => (e.currentTarget.style.color = 'inherit')}>
                 <Home className="h-3.5 w-3.5" />
             </Link>
@@ -29,7 +29,7 @@ export default function PageBreadcrumb({ items }: PageBreadcrumbProps) {
                             {item.label}
                         </Link>
                     ) : (
-                        <span className="font-medium text-gray-900">{item.label}</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{item.label}</span>
                     )}
                 </Fragment>
             ))}

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * financial_transactions is the single ledger for all income (pos_sale, membership,
- * studio_booking). This service joins back to the source tables purely to resolve
+ * studio_booking, training). This service joins back to the source tables purely to resolve
  * display fields (invoice number, customer name) - no UNION needed.
  */
 class FinancialReportService
@@ -21,6 +21,7 @@ class FinancialReportService
         'pos_sale' => 'Gym',
         'membership' => 'Membership',
         'studio_booking' => 'Booking',
+        'training' => 'Pelatihan',
     ];
 
     private const SORTABLE = ['transaction_date', 'amount', 'category'];
@@ -236,6 +237,8 @@ class FinancialReportService
             ->leftJoin('studio_bookings as sb', 'ft.studio_booking_id', '=', 'sb.id')
             ->leftJoin('invoices as inv', 'ft.invoice_id', '=', 'inv.id')
             ->leftJoin('members as m', 'inv.member_id', '=', 'm.id')
+            ->leftJoin('training_participants as tp', 'ft.training_participant_id', '=', 'tp.id')
+            ->leftJoin('trainings as tr', 'tp.training_id', '=', 'tr.id')
             ->where('ft.type', 'income');
 
         if ($category) {
@@ -253,9 +256,10 @@ class FinancialReportService
 
         $query->select([
             'ft.id', 'ft.uuid', 'ft.category', 'ft.amount', 'ft.payment_method', 'ft.transaction_date', 'ft.description',
-            'ft.transaction_id', 'ft.studio_booking_id', 'ft.invoice_id',
-            DB::raw('COALESCE(t.invoice_number, sb.invoice_number, inv.invoice_number) as invoice_number'),
-            DB::raw('COALESCE(t.customer_name, sb.customer_name, m.name) as customer_name'),
+            'ft.transaction_id', 'ft.studio_booking_id', 'ft.invoice_id', 'ft.training_participant_id',
+            DB::raw('COALESCE(t.invoice_number, sb.invoice_number, inv.invoice_number, tp.invoice_number) as invoice_number'),
+            DB::raw('COALESCE(t.customer_name, sb.customer_name, m.name, tp.full_name) as customer_name'),
+            'tr.title as training_title',
         ]);
 
         return $query;
@@ -386,6 +390,8 @@ class FinancialReportService
         } elseif ($category === 'membership' && preg_match('/Pendaftaran member\s+(.+?)\s*-\s*Invoice/u', $description, $matches)) {
             $customerName = trim($matches[1]);
         } elseif ($category === 'studio_booking' && preg_match('/Booking sanggar:\s*(.+?)\s*\(/u', $description, $matches)) {
+            $customerName = trim($matches[1]);
+        } elseif ($category === 'training' && preg_match('/Pelatihan:\s*(.+?)\s*-\s*(.+?)\s*\(Invoice/u', $description, $matches)) {
             $customerName = trim($matches[1]);
         }
 

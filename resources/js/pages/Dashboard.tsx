@@ -10,6 +10,10 @@ import {
     AlertTriangle,
     BookOpen,
     UserPlus,
+    GraduationCap,
+    Calendar,
+    MapPin,
+    CreditCard,
 } from 'lucide-react';
 import AppLayout from '@/layouts/AppLayout';
 import StatCard from '@/components/shared/StatCard';
@@ -23,6 +27,13 @@ import { buttonVariants } from '@/components/ui/button';
 import { useDateTime } from '@/hooks/useDateTime';
 import { formatCurrency, formatDateShort } from '@/lib/format';
 import { PAYMENT_STATUS_LABELS, STATUS_LABELS, formatTime, paymentBadgeStyle, statusBadgeStyle } from '@/pages/bookings/bookingHelpers';
+import {
+    formatTrainingDates,
+    PAYMENT_STATUS_LABELS as TRAINING_PAYMENT_LABELS,
+    paymentBadgeStyle as trainingPaymentBadgeStyle,
+    TRAINING_STATUS_LABELS,
+    trainingStatusBadgeStyle,
+} from '@/pages/trainings/trainingHelpers';
 import type { PageProps } from '@/types';
 import type { StudioBooking } from '@/types/booking';
 import type { NameValuePoint, RevenueByDayPoint } from '@/types/reports';
@@ -36,6 +47,31 @@ interface DashboardStats {
     today_revenue: number;
     monthly_revenue: number;
     new_members_this_month: number;
+    active_trainings: number;
+    monthly_training_participants: number;
+    monthly_training_revenue: number;
+}
+
+interface DashboardTraining {
+    uuid: string;
+    title: string;
+    trainer_name: string;
+    training_dates: string[];
+    training_location: string | null;
+    price: number;
+    status: 'upcoming' | 'ongoing' | 'completed';
+    participants_count: number;
+    paid_participants_count: number;
+    unpaid_participants_count: number;
+}
+
+interface RecentTrainingParticipant {
+    uuid: string;
+    full_name: string;
+    payment_status: string;
+    training_uuid: string | null;
+    training_title: string;
+    created_at: string;
 }
 
 interface RecentActivityItem {
@@ -59,6 +95,8 @@ interface DashboardProps {
     recent_activity: RecentActivityItem[];
     upcoming_expired_members: UpcomingExpiredMember[];
     recent_bookings: StudioBooking[];
+    active_trainings: DashboardTraining[];
+    recent_training_participants: RecentTrainingParticipant[];
     revenue_last_7_days: RevenueByDayPoint[];
     top_classes: NameValuePoint[];
     payment_distribution: NameValuePoint[];
@@ -66,8 +104,17 @@ interface DashboardProps {
 
 export default function Dashboard() {
     const { props } = usePage<PageProps>();
-    const { stats, recent_activity, upcoming_expired_members, recent_bookings, revenue_last_7_days, top_classes, payment_distribution } =
-        props as unknown as DashboardProps;
+    const {
+        stats,
+        recent_activity,
+        upcoming_expired_members,
+        recent_bookings,
+        active_trainings,
+        recent_training_participants,
+        revenue_last_7_days,
+        top_classes,
+        payment_distribution,
+    } = props as unknown as DashboardProps;
     const { auth } = props;
     const { date, time } = useDateTime();
 
@@ -97,8 +144,9 @@ export default function Dashboard() {
                 </div>
 
                 {/* Stat Cards */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <StatCard
+                        size="compact"
                         title="Total Member"
                         value={stats.total_members}
                         icon={Users}
@@ -106,6 +154,7 @@ export default function Dashboard() {
                         color="violet"
                     />
                     <StatCard
+                        size="compact"
                         title="Member Expired"
                         value={stats.expired_members}
                         icon={UserX}
@@ -113,6 +162,7 @@ export default function Dashboard() {
                         color="red"
                     />
                     <StatCard
+                        size="compact"
                         title="Kelas Hari Ini"
                         value={stats.today_classes}
                         icon={Dumbbell}
@@ -120,6 +170,7 @@ export default function Dashboard() {
                         color="blue"
                     />
                     <StatCard
+                        size="compact"
                         title="Booking Hari Ini"
                         value={stats.today_bookings}
                         icon={CalendarCheck}
@@ -127,6 +178,7 @@ export default function Dashboard() {
                         color="green"
                     />
                     <StatCard
+                        size="compact"
                         title="Booking Bulan Ini"
                         value={stats.monthly_bookings}
                         icon={CalendarCheck}
@@ -134,6 +186,7 @@ export default function Dashboard() {
                         color="blue"
                     />
                     <StatCard
+                        size="compact"
                         title="Pendapatan Hari Ini"
                         value={formatCurrency(stats.today_revenue)}
                         icon={Wallet}
@@ -141,11 +194,44 @@ export default function Dashboard() {
                         color="orange"
                     />
                     <StatCard
+                        size="compact"
                         title="Pendapatan Bulan Ini"
                         value={formatCurrency(stats.monthly_revenue)}
                         icon={TrendingUp}
                         description="Total transaksi bulan ini"
                         color="violet"
+                    />
+                    <StatCard
+                        size="compact"
+                        title="Pelatihan Aktif"
+                        value={stats.active_trainings}
+                        icon={GraduationCap}
+                        description="Pelatihan berjalan & mendatang"
+                        color="green"
+                    />
+                    <StatCard
+                        size="compact"
+                        title="Peserta Pelatihan"
+                        value={stats.monthly_training_participants}
+                        icon={Users}
+                        description="Pendaftaran bulan ini"
+                        color="blue"
+                    />
+                    <StatCard
+                        size="compact"
+                        title="Pendapatan Pelatihan"
+                        value={formatCurrency(stats.monthly_training_revenue)}
+                        icon={Wallet}
+                        description="Pembayaran pelatihan bulan ini"
+                        color="orange"
+                    />
+                    <StatCard
+                        size="compact"
+                        title="Member Baru"
+                        value={stats.new_members_this_month}
+                        icon={UserPlus}
+                        description="Pendaftaran baru bulan ini"
+                        color="green"
                     />
                 </div>
 
@@ -163,18 +249,10 @@ export default function Dashboard() {
                     </ChartCard>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <ChartCard title="Top 5 Senam Terlaris" isEmpty={top_classes.length === 0}>
                         <SimplePieChart data={top_classes} />
                     </ChartCard>
-
-                    <StatCard
-                        title="Member Baru Bulan Ini"
-                        value={stats.new_members_this_month}
-                        icon={UserPlus}
-                        description="Pendaftaran baru bulan berjalan"
-                        color="green"
-                    />
 
                     {/* Upcoming Expired Members */}
                     <SectionCard
@@ -212,6 +290,100 @@ export default function Dashboard() {
                 </div>
 
                 {/* Widgets */}
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    {/* Informasi Pelatihan */}
+                    <SectionCard
+                        title="Informasi Pelatihan"
+                        description="Pelatihan berjalan dan mendatang"
+                        action={
+                            <Link
+                                href={route('trainings.index')}
+                                className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+                            >
+                                Lihat Semua
+                            </Link>
+                        }
+                    >
+                        {active_trainings.length === 0 ? (
+                            <EmptyState
+                                icon={GraduationCap}
+                                title="Belum ada pelatihan aktif"
+                                description="Pelatihan yang sedang berjalan atau akan datang akan muncul di sini."
+                            />
+                        ) : (
+                            <div className="space-y-4">
+                                {active_trainings.map((training) => (
+                                    <Link
+                                        key={training.uuid}
+                                        href={route('trainings.show', training.uuid)}
+                                        className="block rounded-xl border border-gray-100 p-4 transition hover:border-gray-200 hover:bg-gray-50/50"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-semibold text-gray-900">{training.title}</p>
+                                                <p className="text-xs text-gray-500">{training.trainer_name}</p>
+                                            </div>
+                                            <Badge className="shrink-0 rounded-full" style={trainingStatusBadgeStyle(training.status)}>
+                                                {TRAINING_STATUS_LABELS[training.status]}
+                                            </Badge>
+                                        </div>
+                                        <div className="mt-3 grid gap-2 text-xs text-gray-500 sm:grid-cols-2">
+                                            <span className="flex items-center gap-1.5">
+                                                <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                                {formatTrainingDates(training.training_dates)}
+                                            </span>
+                                            <span className="flex items-center gap-1.5">
+                                                <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                                                {training.training_location || '-'}
+                                            </span>
+                                            <span className="flex items-center gap-1.5">
+                                                <CreditCard className="h-3.5 w-3.5 text-gray-400" />
+                                                {formatCurrency(training.price)}
+                                            </span>
+                                            <span className="flex items-center gap-1.5">
+                                                <Users className="h-3.5 w-3.5 text-gray-400" />
+                                                {training.participants_count} peserta · {training.paid_participants_count} lunas
+                                            </span>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </SectionCard>
+
+                    {/* Recent Training Participants */}
+                    <SectionCard title="Peserta Pelatihan Terbaru" description="Pendaftaran pelatihan terkini">
+                        {recent_training_participants.length === 0 ? (
+                            <EmptyState
+                                icon={GraduationCap}
+                                title="Belum ada peserta"
+                                description="Pendaftaran pelatihan akan muncul di sini."
+                            />
+                        ) : (
+                            <div className="space-y-3">
+                                {recent_training_participants.map((participant) => (
+                                    <Link
+                                        key={participant.uuid}
+                                        href={route('training-participants.index')}
+                                        className="block rounded-xl border border-gray-100 p-3 transition hover:border-gray-200 hover:bg-gray-50/50"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-medium text-gray-900">{participant.full_name}</p>
+                                            <Badge className="rounded-full text-white" style={trainingPaymentBadgeStyle(participant.payment_status as 'paid' | 'unpaid' | 'pay_later')}>
+                                                {TRAINING_PAYMENT_LABELS[participant.payment_status as keyof typeof TRAINING_PAYMENT_LABELS] ?? participant.payment_status}
+                                            </Badge>
+                                        </div>
+                                        <p className="mt-1 text-xs text-gray-400">
+                                            {participant.training_title} ·{' '}
+                                            {new Date(participant.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </SectionCard>
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     {/* Recent Activity */}
                     <SectionCard title="Aktivitas Terbaru" description="Log aktivitas sistem terkini">

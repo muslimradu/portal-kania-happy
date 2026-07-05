@@ -43,4 +43,26 @@ class InvoiceService
             return $today.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
         });
     }
+
+    public function generateTrainingInvoiceNumber(): string
+    {
+        $date = Carbon::now()->format('Ymd');
+        $today = "TRN-{$date}-";
+
+        return DB::transaction(function () use ($today) {
+            $last = DB::table('training_participants')
+                ->where('invoice_number', 'like', "{$today}%")
+                ->lockForUpdate()
+                ->orderByDesc('invoice_number')
+                ->value('invoice_number');
+
+            $sequence = 1;
+
+            if ($last) {
+                $sequence = (int) substr($last, -4) + 1;
+            }
+
+            return $today.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
+        });
+    }
 }

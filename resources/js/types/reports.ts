@@ -95,7 +95,7 @@ export interface FinancialReportRow {
     uuid: string;
     transaction_date: string;
     invoice_number: string;
-    category: 'pos_sale' | 'membership' | 'studio_booking';
+    category: 'pos_sale' | 'membership' | 'studio_booking' | 'training';
     category_label: string;
     customer_name: string;
     payment_method: 'cash' | 'transfer' | 'qris' | null;

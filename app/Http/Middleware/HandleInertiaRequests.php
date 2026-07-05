@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Services\NotificationService;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -38,6 +39,9 @@ class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'settings' => $settingsService->getPublic(),
+            'notifications' => fn () => $request->user()
+                ? app(NotificationService::class)->forUser($request->user())
+                : [],
             'flash' => [
                 'success'       => fn () => $request->session()->get('success'),
                 'error'         => fn () => $request->session()->get('error'),

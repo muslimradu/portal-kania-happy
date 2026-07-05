@@ -23,6 +23,7 @@ const CATEGORY_BADGE: Record<string, string> = {
     pos_sale: '#2563EB',
     membership: '#7C3AED',
     studio_booking: '#F97316',
+    training: '#059669',
 };
 
 function PeriodCard({ title, icon: Icon, value, trend }: { title: string; icon: typeof Wallet; value: number; trend: number }) {
@@ -100,7 +101,7 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
             <div className="space-y-6">
                 <PageHeader
                     title="Laporan Keuangan"
-                    description="Gabungan pendapatan Kasir, Membership, dan Booking Sanggar"
+                    description="Gabungan pendapatan Kasir, Membership, Booking Sanggar, dan Pelatihan"
                     action={
                         <Button
                             variant="outline"
@@ -139,6 +140,7 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                         <option value="pos_sale">Gym</option>
                         <option value="membership">Membership</option>
                         <option value="studio_booking">Booking</option>
+                        <option value="training">Pelatihan</option>
                     </select>
                     <select
                         value={filters.payment_method ?? ''}
@@ -167,7 +169,7 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                         sortDir={filters.sort_dir as 'asc' | 'desc'}
                         onSort={handleSort}
                         emptyTitle="Belum ada transaksi keuangan"
-                        emptyDescription="Transaksi Kasir, Membership, dan Booking akan muncul di sini."
+                        emptyDescription="Transaksi Kasir, Membership, Booking, dan Pelatihan akan muncul di sini."
                     />
                     <Pagination
                         currentPage={transactions.current_page}

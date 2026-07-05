@@ -24,6 +24,7 @@ interface DataTableProps<T> {
     sortBy?: string;
     sortDir?: 'asc' | 'desc';
     onSort?: (key: string) => void;
+    onRowClick?: (row: T) => void;
 }
 
 export default function DataTable<T>({
@@ -38,6 +39,7 @@ export default function DataTable<T>({
     sortBy,
     sortDir = 'asc',
     onSort,
+    onRowClick,
 }: DataTableProps<T>) {
     if (loading) {
         return (
@@ -96,7 +98,11 @@ export default function DataTable<T>({
                     {data.map((row) => (
                         <tr
                             key={keyExtractor(row)}
-                            className="border-b border-gray-50 transition hover:bg-gray-50/50"
+                            onClick={onRowClick ? () => onRowClick(row) : undefined}
+                            className={cn(
+                                'border-b border-gray-50 transition hover:bg-gray-50/50',
+                                onRowClick && 'cursor-pointer',
+                            )}
                         >
                             {columns.map((col) => (
                                 <td

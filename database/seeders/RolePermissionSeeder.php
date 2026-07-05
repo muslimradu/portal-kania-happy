@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
             'dashboard.view',
@@ -68,6 +69,19 @@ class RolePermissionSeeder extends Seeder
             'reports.membership.export',
             'financial_reports.view',
             'financial_reports.export',
+            'trainings.view',
+            'trainings.create',
+            'trainings.update',
+            'trainings.delete',
+            'trainings.restore',
+            'trainings.export',
+            'training_participants.view',
+            'training_participants.create',
+            'training_participants.update',
+            'training_participants.delete',
+            'training_participants.restore',
+            'training_participants.export',
+            'training_participants.pay',
         ];
 
         foreach ($permissions as $permission) {

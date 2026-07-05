@@ -16,6 +16,7 @@ class FinancialTransaction extends Model
         'transaction_id',
         'studio_booking_id',
         'invoice_id',
+        'training_participant_id',
         'type',
         'category',
         'amount',
@@ -51,6 +52,11 @@ class FinancialTransaction extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function trainingParticipant(): BelongsTo
+    {
+        return $this->belongsTo(TrainingParticipant::class);
     }
 
     public function creator(): BelongsTo

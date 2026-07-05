@@ -22,6 +22,8 @@ class DashboardController extends Controller
             'recent_activity' => $dashboardService->recentActivity(),
             'upcoming_expired_members' => $dashboardService->upcomingExpiredMembers(),
             'recent_bookings' => $dashboardService->recentBookings(),
+            'active_trainings' => $dashboardService->activeTrainings(),
+            'recent_training_participants' => $dashboardService->recentTrainingParticipants(),
             'revenue_last_7_days' => $dashboardService->revenueLast7Days(),
             'top_classes' => $dashboardService->topClasses(),
             'payment_distribution' => $dashboardService->paymentDistribution(),

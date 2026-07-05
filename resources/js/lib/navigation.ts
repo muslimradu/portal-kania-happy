@@ -12,6 +12,7 @@ import {
     CreditCard,
     Package,
     UserCheck,
+    GraduationCap,
     type LucideIcon,
 } from 'lucide-react';
 
@@ -75,6 +76,28 @@ export const navigationItems: NavItem[] = [
         icon: CalendarCheck,
         routeName: 'bookings.index',
         permission: 'studio_bookings.view',
+    },
+    {
+        label: 'Pelatihan',
+        href: '/trainings',
+        icon: GraduationCap,
+        routeName: 'trainings',
+        children: [
+            {
+                label: 'Master Data Pelatihan',
+                href: '/trainings',
+                icon: GraduationCap,
+                routeName: 'trainings.index',
+                permission: 'trainings.view',
+            },
+            {
+                label: 'Daftar Pelatihan',
+                href: '/training-participants',
+                icon: Users,
+                routeName: 'training-participants.index',
+                permission: 'training_participants.view',
+            },
+        ],
     },
     {
         label: 'Laporan',

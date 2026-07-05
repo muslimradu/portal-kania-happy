@@ -190,7 +190,7 @@ Repo sudah include `railway.toml` dan `nixpacks.toml`. Connect GitHub → Railwa
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
 | `APP_KEY` | `base64:...` *(lokal: `php artisan key:generate --show`)* |
-| `APP_URL` | `https://<domain>.up.railway.app` |
+| `APP_URL` | `https://kaniahappy.up.railway.app` |
 | `APP_TIMEZONE` | `Asia/Jakarta` |
 | `DB_CONNECTION` | `mysql` |
 | `DB_HOST` | `${{MySQL.MYSQLHOST}}` |
@@ -210,7 +210,7 @@ Repo sudah include `railway.toml` dan `nixpacks.toml`. Connect GitHub → Railwa
 
 ### 3. Generate domain
 
-**Settings → Networking → Generate Domain** → copy URL HTTPS → update `APP_URL` → redeploy.
+**Settings → Networking → Generate Domain** → set `APP_URL=https://kaniahappy.up.railway.app` → redeploy.
 
 ### 4. Seed pertama kali (via Railway CLI)
 

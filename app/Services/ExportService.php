@@ -7,10 +7,12 @@ namespace App\Services;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\StudioBooking;
+use App\Models\Training;
+use App\Models\TrainingParticipant;
+use App\Models\TrainingParticipantPayment;
 use App\Services\Reports\FinancialReportService;
 use App\Services\Reports\GymActivityReportService;
 use App\Services\Reports\MembershipReportService;
-use App\Services\SettingsService;
 use Illuminate\Support\Carbon;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
@@ -69,6 +71,7 @@ class ExportService
             foreach ($memberships as $membership) {
                 $quotaDetail = $membership->details->map(function ($detail) {
                     $quota = $detail->is_unlimited ? 'Unlimited' : "{$detail->quota_used}/{$detail->quota}";
+
                     return "{$detail->class_name}: {$quota}";
                 })->implode(', ');
 
@@ -132,7 +135,7 @@ class ExportService
     public function exportGymActivityReport(array $filters): StreamedResponse
     {
         $rows = $this->gymActivityReportService->exportRows($filters);
-        $filename = 'Gym_Report_' . Carbon::today()->format('Y-m-d');
+        $filename = 'Gym_Report_'.Carbon::today()->format('Y-m-d');
 
         return $this->stream($filename, 'Laporan Gym Activity', function (Writer $writer) use ($rows) {
             $writer->addRow(Row::fromValues([
@@ -158,7 +161,7 @@ class ExportService
     public function exportMembershipReport(array $filters): StreamedResponse
     {
         $rows = $this->membershipReportService->exportRows($filters);
-        $filename = 'Membership_Report_' . Carbon::today()->format('Y-m-d');
+        $filename = 'Membership_Report_'.Carbon::today()->format('Y-m-d');
 
         $statusLabels = ['active' => 'Aktif', 'expired' => 'Expired', 'cancelled' => 'Dibatalkan'];
 
@@ -184,10 +187,109 @@ class ExportService
         });
     }
 
+    public function exportTrainings(): StreamedResponse
+    {
+        $trainings = Training::withTrashed()
+            ->withCount([
+                'participants as participants_count' => fn ($q) => $q->whereNull('deleted_at'),
+            ])
+            ->orderBy('title')
+            ->get();
+
+        $statusLabels = [
+            'upcoming' => 'Akan Datang',
+            'ongoing' => 'Berjalan',
+            'completed' => 'Selesai',
+        ];
+
+        return $this->stream('master-pelatihan', 'Master Data Pelatihan', function (Writer $writer) use ($trainings, $statusLabels) {
+            $writer->addRow(Row::fromValues([
+                'Judul', 'Trainer', 'Tanggal', 'Lokasi', 'Harga', 'Jumlah Peserta', 'Status', 'Dibuat Pada',
+            ]));
+
+            foreach ($trainings as $training) {
+                $dates = collect($training->training_dates ?? [])->implode(', ');
+                $writer->addRow(Row::fromValues([
+                    $training->title,
+                    $training->trainer_name,
+                    $dates,
+                    $training->training_location ?? '-',
+                    (string) $training->price,
+                    (string) $training->participants_count,
+                    $statusLabels[$training->computeNaturalStatus()] ?? $training->computeNaturalStatus(),
+                    $training->created_at->format('d-m-Y H:i'),
+                ]));
+            }
+        });
+    }
+
+    public function exportTrainingParticipants(): StreamedResponse
+    {
+        $participants = TrainingParticipant::withTrashed()
+            ->with('training:id,title')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $statusLabels = [
+            'paid' => 'Lunas',
+            'unpaid' => 'Belum Bayar',
+            'pay_later' => 'Bayar Nanti',
+        ];
+
+        return $this->stream('peserta-pelatihan', 'Daftar Peserta Pelatihan', function (Writer $writer) use ($participants, $statusLabels) {
+            $writer->addRow(Row::fromValues([
+                'Nama', 'Nomor HP', 'Pelatihan', 'Tanggal Diikuti', 'Invoice', 'Harga', 'Status Pembayaran', 'Metode', 'Dibuat Pada',
+            ]));
+
+            foreach ($participants as $participant) {
+                $selectedDates = $participant->selected_training_dates ?? [];
+                sort($selectedDates);
+
+                $writer->addRow(Row::fromValues([
+                    $participant->full_name,
+                    $participant->phone,
+                    $participant->training?->title ?? '-',
+                    $selectedDates !== [] ? implode(', ', $selectedDates) : '-',
+                    $participant->invoice_number ?? '-',
+                    (string) $participant->amount,
+                    $statusLabels[$participant->payment_status] ?? $participant->payment_status,
+                    $participant->payment_method ?? '-',
+                    $participant->created_at->format('d-m-Y H:i'),
+                ]));
+            }
+        });
+    }
+
+    public function exportTrainingPayments(): StreamedResponse
+    {
+        $payments = TrainingParticipantPayment::query()
+            ->with(['participant.training', 'recorder:id,name'])
+            ->orderByDesc('paid_at')
+            ->get();
+
+        return $this->stream('pembayaran-pelatihan', 'Riwayat Pembayaran Pelatihan', function (Writer $writer) use ($payments) {
+            $writer->addRow(Row::fromValues([
+                'Invoice', 'Nama Peserta', 'Pelatihan', 'Jumlah', 'Metode', 'Dicatat Oleh', 'Tanggal Bayar',
+            ]));
+
+            foreach ($payments as $payment) {
+                $writer->addRow(Row::fromValues([
+                    $payment->invoice_number,
+                    $payment->participant?->full_name ?? '-',
+                    $payment->participant?->training?->title ?? '-',
+                    (string) $payment->amount,
+                    ucfirst($payment->payment_method),
+                    $payment->recorder?->name ?? '-',
+                    $payment->paid_at->format('d-m-Y H:i'),
+                ]));
+            }
+        });
+    }
+
     public function exportFinancialReport(array $filters): StreamedResponse
     {
         $rows = $this->financialReportService->exportRows($filters);
-        $filename = 'Financial_Report_' . Carbon::today()->format('Y-m-d');
+        $filename = 'Financial_Report_'.Carbon::today()->format('Y-m-d');
 
         return $this->stream($filename, 'Laporan Keuangan', function (Writer $writer) use ($rows) {
             $writer->addRow(Row::fromValues([
@@ -212,8 +314,8 @@ class ExportService
     private function stream(string $filename, string $reportTitle, callable $callback): StreamedResponse
     {
         $response = new StreamedResponse(function () use ($callback, $filename, $reportTitle) {
-            $writer = new Writer();
-            $writer->openToBrowser($filename . '.xlsx');
+            $writer = new Writer;
+            $writer->openToBrowser($filename.'.xlsx');
             $this->writeMetadata($writer, $reportTitle);
             $callback($writer);
             $writer->close();

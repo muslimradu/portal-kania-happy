@@ -30,7 +30,6 @@ export default function Step1SelectGymClass({ gymClasses, selected, onSelect, on
                 onChange={setSearch}
                 placeholder="Cari kelas gym... (Ctrl+K)"
                 className="max-w-md"
-                autoFocus
             />
 
             {filtered.length === 0 ? (

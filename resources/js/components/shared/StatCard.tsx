@@ -40,7 +40,7 @@ export default function StatCard({
 
     if (loading) {
         return (
-            <div className={cn('bg-white shadow-sm', roundedClass, paddingClass)}>
+            <div className={cn('bg-white shadow-sm dark:bg-gray-900', roundedClass, paddingClass)}>
                 <div className="flex items-center justify-between">
                     <div className={cn('animate-pulse rounded-lg bg-gray-100', isMini ? 'h-2.5 w-16' : isCompact ? 'h-3 w-20' : 'h-4 w-24')} />
                     <div className={cn('animate-pulse rounded-lg bg-gray-100', isMini ? 'h-7 w-7' : isCompact ? 'h-8 w-8' : 'h-10 w-10')} />
@@ -51,7 +51,7 @@ export default function StatCard({
     }
 
     return (
-        <div className={cn('bg-white shadow-sm transition hover:shadow-md', roundedClass, paddingClass)}>
+        <div className={cn('bg-white shadow-sm transition hover:shadow-md dark:bg-gray-900', roundedClass, paddingClass)}>
             <div className="flex items-center justify-between gap-2">
                 <p className={cn('font-medium text-gray-500 leading-tight', isMini ? 'text-[11px]' : isCompact ? 'text-xs' : 'text-sm')}>{title}</p>
                 <div
@@ -68,7 +68,7 @@ export default function StatCard({
                     <Icon className={isMini ? 'h-3.5 w-3.5' : isCompact ? 'h-4 w-4' : 'h-5 w-5'} />
                 </div>
             </div>
-            <p className={cn('font-bold text-gray-900', isMini ? 'mt-1.5 text-lg' : isCompact ? 'mt-2 text-xl' : 'mt-4 text-3xl')}>{value}</p>
+            <p className={cn('font-bold text-gray-900 dark:text-gray-100', isMini ? 'mt-1.5 truncate text-base' : isCompact ? 'mt-2 text-xl' : 'mt-4 text-3xl')}>{value}</p>
             {description && (
                 <p className={cn('text-gray-400', isMini ? 'mt-0.5 text-[10px]' : isCompact ? 'mt-0.5 text-xs' : 'mt-1 text-sm')}>{description}</p>
             )}
