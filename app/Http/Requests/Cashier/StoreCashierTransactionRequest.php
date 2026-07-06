@@ -30,12 +30,13 @@ class StoreCashierTransactionRequest extends FormRequest
             'gym_class_uuid' => ['required', 'string', 'exists:gym_classes,uuid'],
             'customer_name' => ['required', 'string', 'max:100'],
             'customer_phone' => ['nullable', 'string', 'max:20'],
-            'payment_method' => ['required', Rule::in(['cash', 'transfer', 'qris'])],
+            'payment_method' => ['required', Rule::in(['cash', 'transfer', 'qris', 'pay_later'])],
             'payment_configuration_id' => [
                 'nullable',
                 'integer',
-                'required_if:payment_method,transfer,qris',
-                'exists:payment_configurations,id',
+                Rule::requiredIf(fn () => in_array($this->input('payment_method'), ['transfer', 'qris'], true)),
+                'prohibited_if:payment_method,pay_later',
+                Rule::exists('payment_configurations', 'id')->whereNull('deleted_at'),
             ],
         ];
     }

@@ -14,7 +14,7 @@ case "${DB_HOST:-}" in
         ;;
 esac
 
-mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+mkdir -p storage/app/public/payment/qris storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
 php artisan config:clear 2>/dev/null || true

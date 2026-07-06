@@ -1,17 +1,17 @@
-import { ArrowLeft, ArrowRight, Copy, Landmark, QrCode, ShieldCheck, Wallet } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { ArrowLeft, ArrowRight, Clock, Copy, Landmark, QrCode, ShieldCheck, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import type { CashierGymClass, CustomerType } from '@/types/cashier';
+import QrisPreview from '@/components/shared/QrisPreview';
+import type { CashierGymClass, CashierPaymentMethod, CustomerType } from '@/types/cashier';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
 
 interface Step3PaymentProps {
     gymClass: CashierGymClass;
     customerType: CustomerType;
     paymentConfigurations: PaymentConfiguration[];
-    paymentMethod: 'cash' | 'transfer' | 'qris';
+    paymentMethod: CashierPaymentMethod;
     paymentConfigurationId: number | null;
-    onChangeMethod: (method: 'cash' | 'transfer' | 'qris') => void;
+    onChangeMethod: (method: CashierPaymentMethod) => void;
     onChangeConfiguration: (id: number | null) => void;
     onBack: () => void;
     onNext: () => void;
@@ -29,6 +29,7 @@ const METHODS = [
     { value: 'cash' as const, label: 'Cash', icon: Wallet },
     { value: 'transfer' as const, label: 'Transfer', icon: Landmark },
     { value: 'qris' as const, label: 'QRIS', icon: QrCode },
+    { value: 'pay_later' as const, label: 'Bayar Nanti', icon: Clock },
 ];
 
 function copyToClipboard(text: string) {
@@ -78,7 +79,7 @@ export default function Step3Payment({
         );
     }
 
-    const canProceed = paymentMethod === 'cash' || paymentConfigurationId !== null;
+    const canProceed = paymentMethod === 'cash' || paymentMethod === 'pay_later' || paymentConfigurationId !== null;
 
     return (
         <div className="space-y-5">
@@ -102,7 +103,7 @@ export default function Step3Payment({
 
             <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-900">Metode Pembayaran</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {METHODS.map((method) => {
                         const Icon = method.icon;
                         const isActive = paymentMethod === method.value;
@@ -130,6 +131,12 @@ export default function Step3Payment({
             {paymentMethod === 'cash' && (
                 <div className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500">
                     Pembayaran tunai akan diterima langsung oleh admin. Klik lanjut untuk menyelesaikan transaksi.
+                </div>
+            )}
+
+            {paymentMethod === 'pay_later' && (
+                <div className="rounded-xl border border-dashed border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+                    Customer akan dicatat hadir dengan status <strong>Bayar Nanti</strong>. Pembayaran dapat diproses dari daftar hadir hari ini.
                 </div>
             )}
 
@@ -184,31 +191,14 @@ export default function Step3Payment({
                                 }`}
                                 style={paymentConfigurationId === account.id ? { ['--tw-ring-color' as string]: 'var(--brand-primary)' } : {}}
                             >
-                                {account.qris_type === 'upload' && account.qris_image && (
-                                    <img
-                                        src={`/storage/${account.qris_image}`}
-                                        alt={account.name}
-                                        className="h-16 w-16 shrink-0 rounded-lg border border-gray-100 object-contain"
-                                    />
-                                )}
-                                {account.qris_type === 'url' && account.qris_url && (
-                                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-gray-100 bg-white p-1">
-                                        <QRCodeSVG value={account.qris_url} size={56} />
-                                    </div>
-                                )}
+                                <QrisPreview config={account} size={64} className="shrink-0" />
                                 <p className="text-sm font-semibold text-gray-900">{account.name}</p>
                             </button>
                         ))
                     )}
-                    {selectedConfig?.qris_type === 'upload' && selectedConfig.qris_image && (
+                    {selectedConfig && (selectedConfig.qris_type === 'url' ? selectedConfig.qris_url : selectedConfig.qris_image) && (
                         <div className="flex flex-col items-center rounded-xl border border-gray-100 p-4">
-                            <img src={`/storage/${selectedConfig.qris_image}`} alt="QRIS" className="h-48 w-48 object-contain" />
-                            <p className="mt-2 text-xs text-gray-400">Scan QRIS untuk membayar</p>
-                        </div>
-                    )}
-                    {selectedConfig?.qris_type === 'url' && selectedConfig.qris_url && (
-                        <div className="flex flex-col items-center rounded-xl border border-gray-100 p-4">
-                            <QRCodeSVG value={selectedConfig.qris_url} size={192} />
+                            <QrisPreview config={selectedConfig} size={192} />
                             <p className="mt-2 text-xs text-gray-400">Scan QRIS untuk membayar</p>
                         </div>
                     )}

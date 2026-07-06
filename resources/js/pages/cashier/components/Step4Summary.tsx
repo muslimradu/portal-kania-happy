@@ -1,6 +1,6 @@
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { CashierGymClass, CashierMember, CustomerType, NonMemberInfo } from '@/types/cashier';
+import type { CashierGymClass, CashierMember, CashierPaymentMethod, CustomerType, NonMemberInfo } from '@/types/cashier';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
 
 interface Step4SummaryProps {
@@ -8,7 +8,7 @@ interface Step4SummaryProps {
     customerType: CustomerType;
     nonMemberInfo: NonMemberInfo;
     selectedMember: CashierMember | null;
-    paymentMethod: 'cash' | 'transfer' | 'qris';
+    paymentMethod: CashierPaymentMethod;
     paymentConfiguration: PaymentConfiguration | null;
     processing: boolean;
     quotaError?: string | null;
@@ -24,7 +24,7 @@ function formatCurrency(amount: number): string {
     }).format(amount);
 }
 
-const METHOD_LABELS: Record<string, string> = { cash: 'Cash', transfer: 'Transfer', qris: 'QRIS' };
+const METHOD_LABELS: Record<string, string> = { cash: 'Cash', transfer: 'Transfer', qris: 'QRIS', pay_later: 'Bayar Nanti' };
 
 export default function Step4Summary({
     gymClass,
@@ -39,6 +39,7 @@ export default function Step4Summary({
     onSubmit,
 }: Step4SummaryProps) {
     const isMember = customerType === 'member';
+    const isPayLater = !isMember && paymentMethod === 'pay_later';
     const total = isMember ? 0 : Number(gymClass.price);
     const customerName = isMember ? selectedMember?.name ?? '-' : nonMemberInfo.name;
     const today = new Date();
@@ -56,17 +57,24 @@ export default function Step4Summary({
                 <SummaryRow label="Nama" value={customerName} />
                 <SummaryRow label="Jenis Senam" value={gymClass.name} />
                 {!isMember && <SummaryRow label="Metode" value={METHOD_LABELS[paymentMethod]} />}
-                {!isMember && paymentConfiguration && <SummaryRow label="Tujuan Pembayaran" value={paymentConfiguration.name} />}
+                {!isMember && paymentConfiguration && paymentMethod !== 'pay_later' && (
+                    <SummaryRow label="Tujuan Pembayaran" value={paymentConfiguration.name} />
+                )}
                 <SummaryRow label="Invoice" value={isMember ? '-' : `${invoicePreviewPrefix}-XXXX (preview)`} />
             </div>
 
             <div
                 className="flex flex-col items-center gap-1 rounded-2xl p-6 text-center text-white"
-                style={{ backgroundColor: 'var(--brand-primary)' }}
+                style={{ backgroundColor: isPayLater ? '#d97706' : 'var(--brand-primary)' }}
             >
-                <p className="text-xs font-medium uppercase tracking-wide text-white/80">Total Pembayaran</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-white/80">
+                    {isPayLater ? 'Total Tagihan' : 'Total Pembayaran'}
+                </p>
                 <p className="text-4xl font-bold">{formatCurrency(total)}</p>
                 {isMember && <p className="mt-1 text-xs text-white/80">Kuota membership akan dipotong otomatis</p>}
+                {isPayLater && (
+                    <p className="mt-1 text-xs text-white/90">Pembayaran dapat dilakukan nanti dari daftar hadir</p>
+                )}
             </div>
 
             {quotaError && (
@@ -85,7 +93,7 @@ export default function Step4Summary({
                     style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
                     {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isMember ? 'Selesaikan Check In' : 'Selesaikan Transaksi'}
+                    {isMember ? 'Selesaikan Check In' : isPayLater ? 'Catat & Bayar Nanti' : 'Selesaikan Transaksi'}
                 </Button>
             </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import { Pencil, Trash2, RotateCcw, CheckCircle } from 'lucide-react';
+import QrisPreview from '@/components/shared/QrisPreview';
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
@@ -53,13 +54,9 @@ export default function QrisCard({ qris, onEdit }: QrisCardProps) {
                 </div>
 
                 {/* QR Preview */}
-                {qris.qris_image && (
+                {(qris.qris_type === 'url' ? qris.qris_url : qris.qris_image) && (
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-gray-100">
-                        <img
-                            src={`/storage/${qris.qris_image}`}
-                            alt={qris.name}
-                            className="h-full w-full object-contain"
-                        />
+                        <QrisPreview config={qris} size={80} className="h-full w-full" />
                     </div>
                 )}
             </div>

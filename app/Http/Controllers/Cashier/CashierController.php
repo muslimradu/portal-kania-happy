@@ -6,11 +6,13 @@ namespace App\Http\Controllers\Cashier;
 
 use App\Http\Controllers\Concerns\AuthorizesPermissions;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Cashier\ProcessCashierPaymentRequest;
 use App\Http\Requests\Cashier\StoreCashierTransactionRequest;
 use App\Http\Requests\Cashier\StoreCheckInRequest;
 use App\Models\GymClass;
 use App\Models\Member;
 use App\Models\PaymentConfiguration;
+use App\Models\Transaction;
 use App\Services\CashierService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -36,7 +38,7 @@ class CashierController extends Controller
         $gymClasses = GymClass::active()
             ->withCount([
                 'attendances' => fn ($q) => $q->whereDate('checked_in_at', $today),
-                'transactions' => fn ($q) => $q->whereDate('created_at', $today)->where('status', 'paid'),
+                'transactions' => fn ($q) => $q->whereDate('created_at', $today)->whereIn('status', ['paid', 'unpaid']),
             ])
             ->orderBy('name')
             ->get()
@@ -122,13 +124,26 @@ class CashierController extends Controller
     public function store(StoreCashierTransactionRequest $request): RedirectResponse
     {
         $transaction = $this->cashierService->checkoutNonMember($request->validated());
+        $isPayLater = $transaction->status === 'unpaid';
 
-        return back()->with('success', 'Transaction completed successfully.')->with('cashierResult', [
+        return back()->with('success', $isPayLater ? 'Transaksi bayar nanti berhasil dicatat.' : 'Transaction completed successfully.')->with('cashierResult', [
             'type' => 'transaction',
             'invoice_number' => $transaction->invoice_number,
             'customer_name' => $transaction->customer_name,
             'class_name' => $transaction->class_name,
             'amount' => $transaction->amount,
+            'pay_later' => $isPayLater,
         ]);
+    }
+
+    public function pay(ProcessCashierPaymentRequest $request, Transaction $transaction): RedirectResponse
+    {
+        try {
+            $this->cashierService->processPayment($transaction, $request->validated());
+        } catch (RuntimeException $e) {
+            return back()->withErrors(['payment' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Pembayaran berhasil diproses.');
     }
 }

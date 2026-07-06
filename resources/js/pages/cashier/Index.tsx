@@ -12,6 +12,7 @@ import TodayAttendancePanel from './components/TodayAttendancePanel';
 import type {
     CashierGymClass,
     CashierMember,
+    CashierPaymentMethod,
     CashierResult,
     CustomerType,
     EligibilityResult,
@@ -40,7 +41,7 @@ export default function CashierIndex({ gymClasses, paymentConfigurations, todayA
     const [selectedMember, setSelectedMember] = useState<CashierMember | null>(null);
     const [eligibility, setEligibility] = useState<EligibilityResult | null>(null);
     const [eligibilityLoading, setEligibilityLoading] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'transfer' | 'qris'>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<CashierPaymentMethod>('cash');
     const [paymentConfigurationId, setPaymentConfigurationId] = useState<number | null>(null);
     const [processing, setProcessing] = useState(false);
     const [result, setResult] = useState<CashierResult | null>(null);
@@ -91,7 +92,11 @@ export default function CashierIndex({ gymClasses, paymentConfigurations, todayA
             : customerType === 'member'
               ? Boolean(selectedMember) && Boolean(eligibility?.eligible)
               : false;
-    const canGoStep4 = customerType === 'member' || paymentMethod === 'cash' || paymentConfigurationId !== null;
+    const canGoStep4 =
+        customerType === 'member' ||
+        paymentMethod === 'cash' ||
+        paymentMethod === 'pay_later' ||
+        paymentConfigurationId !== null;
 
     const handleSubmit = useCallback(() => {
         if (!selectedGymClass || !customerType || processing) return;
@@ -118,7 +123,7 @@ export default function CashierIndex({ gymClasses, paymentConfigurations, todayA
                     customer_name: nonMemberInfo.name,
                     customer_phone: nonMemberInfo.phone || null,
                     payment_method: paymentMethod,
-                    payment_configuration_id: paymentConfigurationId,
+                    payment_configuration_id: paymentMethod === 'pay_later' ? null : paymentConfigurationId,
                 },
                 {
                     preserveScroll: true,
@@ -236,7 +241,7 @@ export default function CashierIndex({ gymClasses, paymentConfigurations, todayA
                     </div>
 
                     <div className="xl:sticky xl:top-6 xl:self-start">
-                        <TodayAttendancePanel data={todayAttendance} />
+                        <TodayAttendancePanel data={todayAttendance} paymentConfigurations={paymentConfigurations} />
                     </div>
                 </div>
             </div>

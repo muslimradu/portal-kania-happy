@@ -242,9 +242,9 @@ Sudah dikonfigurasi di codebase:
 
 Set juga `SESSION_SECURE_COOKIE=true` di Railway variables.
 
-#### Storage ephemeral (upload logo)
+#### Storage ephemeral (upload logo, QRIS, branding)
 
-Filesystem Railway **tidak permanen** — upload branding bisa hilang saat redeploy.
+Filesystem Railway **tidak permanen** — upload logo, gambar QRIS, dan file lain di `storage/app/public` bisa hilang saat redeploy.
 
 **Opsi A — Railway Volume (disarankan untuk logo/favicon):**
 

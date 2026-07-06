@@ -98,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/eligibility', [CashierController::class, 'eligibility'])->name('eligibility');
         Route::post('/check-in', [CashierController::class, 'checkIn'])->name('check-in');
         Route::post('/transactions', [CashierController::class, 'store'])->name('transactions.store');
+        Route::post('/transactions/{transaction:uuid}/pay', [CashierController::class, 'pay'])->name('transactions.pay');
     });
 
     // Studio Bookings

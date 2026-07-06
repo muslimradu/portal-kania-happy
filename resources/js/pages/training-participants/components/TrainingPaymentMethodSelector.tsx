@@ -1,5 +1,6 @@
 import { Clock, Copy, Landmark, QrCode, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
+import QrisPreview from '@/components/shared/QrisPreview';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
 import type { TrainingPaymentMethod } from '@/types/training-participant';
 
@@ -144,24 +145,14 @@ export default function TrainingPaymentMethodSelector({
                                         : {}
                                 }
                             >
-                                {account.qris_image && (
-                                    <img
-                                        src={`/storage/${account.qris_image}`}
-                                        alt={account.name}
-                                        className="h-16 w-16 shrink-0 rounded-lg border border-gray-100 object-contain"
-                                    />
-                                )}
+                                <QrisPreview config={account} size={64} className="shrink-0" />
                                 <p className="text-sm font-semibold text-gray-900">{account.name}</p>
                             </button>
                         ))
                     )}
-                    {selectedConfig?.qris_image && (
+                    {selectedConfig && (selectedConfig.qris_type === 'url' ? selectedConfig.qris_url : selectedConfig.qris_image) && (
                         <div className="flex flex-col items-center rounded-xl border border-gray-100 p-4">
-                            <img
-                                src={`/storage/${selectedConfig.qris_image}`}
-                                alt="QRIS"
-                                className="h-44 w-44 object-contain"
-                            />
+                            <QrisPreview config={selectedConfig} size={176} />
                             <p className="mt-2 text-xs text-gray-400">Scan QRIS untuk membayar</p>
                         </div>
                     )}

@@ -143,6 +143,8 @@ class CashierService
     {
         return DB::transaction(function () use ($data) {
             $gymClass = GymClass::where('uuid', $data['gym_class_uuid'])->firstOrFail();
+            $paymentMethod = $data['payment_method'];
+            $isPayLater = $paymentMethod === 'pay_later';
 
             $invoiceNumber = $this->invoiceService->generateInvoiceNumber();
 
@@ -152,33 +154,29 @@ class CashierService
                 'customer_phone' => $data['customer_phone'] ?? null,
                 'gym_class_id' => $gymClass->id,
                 'class_name' => $gymClass->name,
-                'payment_configuration_id' => $data['payment_configuration_id'] ?? null,
-                'payment_method' => $data['payment_method'],
+                'payment_configuration_id' => $isPayLater ? null : ($data['payment_configuration_id'] ?? null),
+                'payment_method' => $paymentMethod,
                 'amount' => $gymClass->price,
-                'status' => 'paid',
+                'status' => $isPayLater ? 'unpaid' : 'paid',
                 'created_by' => auth()->id(),
                 'updated_by' => auth()->id(),
             ]);
 
-            FinancialTransaction::create([
-                'transaction_id' => $transaction->id,
-                'type' => 'income',
-                'category' => 'pos_sale',
-                'amount' => $transaction->amount,
-                'payment_method' => $transaction->payment_method,
-                'description' => "Transaksi kasir non member: {$transaction->class_name} - {$transaction->customer_name}",
-                'transaction_date' => now()->toDateString(),
-                'created_by' => auth()->id(),
-            ]);
+            if (! $isPayLater) {
+                $this->recordFinancialTransaction($transaction);
+            }
 
             app(ActivityLogService::class)->log(
                 module: 'transactions',
                 action: 'create',
-                description: "Transaksi non member: {$transaction->customer_name} - {$transaction->class_name} (Invoice {$transaction->invoice_number})",
+                description: $isPayLater
+                    ? "Transaksi non member (bayar nanti): {$transaction->customer_name} - {$transaction->class_name} (Invoice {$transaction->invoice_number})"
+                    : "Transaksi non member: {$transaction->customer_name} - {$transaction->class_name} (Invoice {$transaction->invoice_number})",
                 properties: [
                     'invoice_number' => $transaction->invoice_number,
                     'amount' => (string) $transaction->amount,
                     'payment_method' => $transaction->payment_method,
+                    'status' => $transaction->status,
                 ],
             );
 
@@ -186,8 +184,57 @@ class CashierService
         });
     }
 
+    public function processPayment(Transaction $transaction, array $data): Transaction
+    {
+        return DB::transaction(function () use ($transaction, $data) {
+            if ($transaction->status === 'paid') {
+                throw new RuntimeException('Transaksi ini sudah lunas.');
+            }
+
+            if ($transaction->status === 'cancelled') {
+                throw new RuntimeException('Transaksi ini sudah dibatalkan.');
+            }
+
+            $transaction->update([
+                'payment_method' => $data['payment_method'],
+                'payment_configuration_id' => $data['payment_configuration_id'] ?? null,
+                'status' => 'paid',
+                'updated_by' => auth()->id(),
+            ]);
+
+            $this->recordFinancialTransaction($transaction->fresh());
+
+            app(ActivityLogService::class)->log(
+                module: 'transactions',
+                action: 'pay',
+                description: "Pembayaran transaksi kasir: {$transaction->customer_name} - {$transaction->class_name} (Invoice {$transaction->invoice_number})",
+                properties: [
+                    'invoice_number' => $transaction->invoice_number,
+                    'amount' => (string) $transaction->amount,
+                    'payment_method' => $transaction->payment_method,
+                ],
+            );
+
+            return $transaction->fresh(['gymClass', 'paymentConfiguration']);
+        });
+    }
+
+    private function recordFinancialTransaction(Transaction $transaction): void
+    {
+        FinancialTransaction::create([
+            'transaction_id' => $transaction->id,
+            'type' => 'income',
+            'category' => 'pos_sale',
+            'amount' => $transaction->amount,
+            'payment_method' => $transaction->payment_method,
+            'description' => "Transaksi kasir non member: {$transaction->class_name} - {$transaction->customer_name}",
+            'transaction_date' => now()->toDateString(),
+            'created_by' => auth()->id(),
+        ]);
+    }
+
     /**
-     * @return array<int, array{uuid: string, name: string, gym_class: string, member_status: string, checked_in_at: string}>
+     * @return array<int, array<string, mixed>>
      */
     public function todayAttendanceList(): array
     {
@@ -195,7 +242,7 @@ class CashierService
         $to = Carbon::today()->endOfDay();
 
         $transactions = DB::table('transactions')
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'unpaid'])
             ->whereNull('deleted_at')
             ->whereBetween('created_at', [$from, $to])
             ->selectRaw("
@@ -203,6 +250,9 @@ class CashierService
                 customer_name as name,
                 COALESCE(class_name, 'Umum') as gym_class,
                 'non_member' as member_status,
+                status as payment_status,
+                amount,
+                invoice_number,
                 created_at as checked_in_at
             ");
 
@@ -214,6 +264,9 @@ class CashierService
                 members.name as name,
                 COALESCE(attendances.class_name, 'Umum') as gym_class,
                 'member' as member_status,
+                'paid' as payment_status,
+                0 as amount,
+                NULL as invoice_number,
                 attendances.checked_in_at
             ");
 
@@ -226,6 +279,9 @@ class CashierService
                 'name' => (string) $row->name,
                 'gym_class' => (string) $row->gym_class,
                 'member_status' => (string) $row->member_status,
+                'payment_status' => (string) $row->payment_status,
+                'amount' => (float) $row->amount,
+                'invoice_number' => $row->invoice_number ? (string) $row->invoice_number : null,
                 'checked_in_at' => Carbon::parse($row->checked_in_at)->toIso8601String(),
             ])
             ->all();

@@ -3,6 +3,7 @@ import { router } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save, Upload, Link } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +36,7 @@ export default function QrisFormDialog({ open, onOpenChange, qris }: QrisFormDia
     });
 
     const qrisType = watch('qris_type');
+    const qrisUrl = watch('qris_url');
     const isActive = watch('is_active');
 
     const onSubmit = (data: QrisFormValues) => {
@@ -139,7 +141,12 @@ export default function QrisFormDialog({ open, onOpenChange, qris }: QrisFormDia
                                 {...register('qris_url')}
                             />
                             {errors.qris_url && <p className="text-sm text-red-600">{errors.qris_url.message}</p>}
-                            <p className="text-xs text-gray-400">QR Code akan di-generate otomatis dari URL ini.</p>
+                            {qrisUrl && (
+                                <div className="flex justify-center rounded-xl border border-gray-100 bg-gray-50 p-4">
+                                    <QRCodeSVG value={qrisUrl} size={160} />
+                                </div>
+                            )}
+                            <p className="text-xs text-gray-400">QR Code ditampilkan langsung di browser dari URL ini.</p>
                         </div>
                     )}
 

@@ -2,6 +2,9 @@ import type { GymClass } from './gym-class';
 import type { Membership } from './membership';
 import type { PaymentConfiguration } from './payment-configuration';
 
+export type CashierPaymentMethod = 'cash' | 'transfer' | 'qris' | 'pay_later';
+export type CashierPaymentStatus = 'paid' | 'unpaid';
+
 export interface CashierGymClass extends GymClass {
     attendances_count?: number;
 }
@@ -38,6 +41,7 @@ export interface CashierResult {
     class_name: string;
     amount?: number;
     checked_in_at?: string;
+    pay_later?: boolean;
 }
 
 export interface TodayAttendanceRow {
@@ -45,6 +49,9 @@ export interface TodayAttendanceRow {
     name: string;
     gym_class: string;
     member_status: 'member' | 'non_member';
+    payment_status: CashierPaymentStatus;
+    amount: number;
+    invoice_number: string | null;
     checked_in_at: string;
 }
 

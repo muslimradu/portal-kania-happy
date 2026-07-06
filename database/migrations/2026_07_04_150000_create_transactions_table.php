@@ -17,9 +17,9 @@ return new class extends Migration
             $table->unsignedBigInteger('gym_class_id')->nullable();
             $table->string('class_name');
             $table->unsignedBigInteger('payment_configuration_id')->nullable();
-            $table->enum('payment_method', ['cash', 'transfer', 'qris']);
+            $table->enum('payment_method', ['cash', 'transfer', 'qris', 'pay_later'])->nullable();
             $table->decimal('amount', 12, 2)->default(0);
-            $table->enum('status', ['paid', 'cancelled'])->default('paid');
+            $table->enum('status', ['paid', 'unpaid', 'cancelled'])->default('paid');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();

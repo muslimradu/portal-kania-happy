@@ -8,7 +8,6 @@ use App\Models\PaymentConfiguration;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PaymentConfigurationService
 {
@@ -122,16 +121,12 @@ class PaymentConfigurationService
             return $existing?->qris_image;
         }
 
-        if ($data['qris_type'] === 'url' && ! empty($data['qris_url'])) {
-            if ($existing?->qris_image && str_contains($existing->qris_image, 'payment/qris/generated')) {
+        if ($data['qris_type'] === 'url') {
+            if ($existing?->qris_image) {
                 Storage::disk('public')->delete($existing->qris_image);
             }
 
-            $qrCode = QrCode::format('png')->size(300)->generate($data['qris_url']);
-            $path   = 'payment/qris/generated/' . uniqid() . '.png';
-            Storage::disk('public')->put($path, $qrCode);
-
-            return $path;
+            return null;
         }
 
         return $existing?->qris_image;
