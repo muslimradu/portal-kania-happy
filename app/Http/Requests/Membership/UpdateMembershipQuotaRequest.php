@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Membership;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -29,6 +30,11 @@ class UpdateMembershipQuotaRequest extends FormRequest
             'details.*.is_unlimited' => ['boolean'],
             'details.*.quota'        => ['nullable', 'integer', 'min:0'],
             'details.*.quota_used'   => ['required', 'integer', 'min:0'],
+
+            'start_date'       => ['nullable', 'date'],
+            'end_date'         => ['nullable', 'date'],
+            'expired_type'     => ['nullable', Rule::in(['manual', 'days', 'weeks', 'months', 'years'])],
+            'expired_duration' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
@@ -56,6 +62,17 @@ class UpdateMembershipQuotaRequest extends FormRequest
                         'Pemakaian tidak boleh melebihi total kuota.'
                     );
                 }
+            }
+
+            $expiredType = $this->input('expired_type');
+            if ($expiredType && $expiredType !== 'manual' && ! $this->input('expired_duration')) {
+                $validator->errors()->add('expired_duration', 'Durasi masa expired wajib diisi.');
+            }
+
+            $startDate = $this->input('start_date');
+            $endDate = $this->input('end_date');
+            if ($startDate && $endDate && Carbon::parse($endDate)->lt(Carbon::parse($startDate))) {
+                $validator->errors()->add('end_date', 'Tanggal berakhir tidak boleh sebelum tanggal mulai.');
             }
         });
     }

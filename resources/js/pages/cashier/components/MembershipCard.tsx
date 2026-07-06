@@ -1,13 +1,9 @@
 import type { Membership } from '@/types/membership';
+import { formatCashierMembershipExpiry } from '@/lib/membership-expiry';
 
 interface MembershipCardProps {
     membership: Membership;
     activeGymClassId?: number | null;
-}
-
-function formatDate(value: string | null): string {
-    if (!value) return 'Tanpa batas';
-    return new Date(value).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 export default function MembershipCard({ membership, activeGymClassId }: MembershipCardProps) {
@@ -15,7 +11,13 @@ export default function MembershipCard({ membership, activeGymClassId }: Members
         <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
             <div className="flex items-center justify-between">
                 <p className="font-semibold text-gray-900">{membership.package_name}</p>
-                <span className="text-xs text-gray-500">Exp: {formatDate(membership.end_date)}</span>
+                <span className="text-xs text-gray-500">
+                    {formatCashierMembershipExpiry(
+                        membership.start_date,
+                        membership.end_date,
+                        membership.membership_package,
+                    )}
+                </span>
             </div>
             <div className="mt-2 flex flex-wrap gap-1.5">
                 {membership.details.map((detail) => {

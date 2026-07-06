@@ -7,27 +7,33 @@
 /public/fonts-manifest.dev.json
 /storage/*.key
 /storage/pail
+/storage/debugbar/
 /bootstrap/cache/*.php
 !/bootstrap/cache/.gitignore
+/bootstrap/ssr/
 
 # PHPUnit / Testing
 .phpunit.result.cache
 .phpunit.cache
 /coverage/
+coverage.xml
 /.tmp_test*/
 
 # Environment
 .env
+.env.*
+!.env.example
 .env.backup
 .env.production
 .env.local
-.env.*.local
+.env.testing
 
-# Database (local SQLite)
+# Database (local)
 /database/*.sqlite
 /database/*.sqlite-journal
 /database/*.sqlite-wal
 /database/*.sqlite-shm
+/database/*.sql
 
 # Composer
 /auth.json
@@ -38,6 +44,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .pnpm-store/
+*.tsbuildinfo
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 
 # IDE / Editor
 /.idea/
@@ -69,22 +80,20 @@ Desktop.ini
 *.log
 /storage/logs/*.log
 
-# Homestead / Vagrant
+# Homestead / Vagrant / Docker (local overrides)
 Homestead.json
 Homestead.yaml
 /.vagrant/
+docker-compose.override.yml
 
-# Archives
+# Archives & dumps
 *.zip
 *.tar
 *.tar.gz
 *.rar
+*.pem
+*.key
 
-# Build artifacts
-*.tsbuildinfo
-
-# Laravel Sail
-docker-compose.override.yml
-
-# Optional: keep local dev tools config out of repo
-/.phpunit.cache
+# Local tooling
+/.cache/
+/dist/

@@ -6,6 +6,7 @@ import type { RegistrationStep1Values } from '@/lib/validations/member-registrat
 
 interface Step4SummaryProps {
     memberInfo: RegistrationStep1Values;
+    isExistingMember?: boolean;
     selectedPackages: MembershipPackage[];
     paymentMethod: 'cash' | 'transfer' | 'qris';
     paymentConfiguration: PaymentConfiguration | null;
@@ -26,6 +27,7 @@ const PAYMENT_LABELS: Record<string, string> = { cash: 'Cash', transfer: 'Transf
 
 export default function Step4Summary({
     memberInfo,
+    isExistingMember = false,
     selectedPackages,
     paymentMethod,
     paymentConfiguration,
@@ -39,15 +41,17 @@ export default function Step4Summary({
         <div className="space-y-5">
             <div className="flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-700">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
-                Periksa kembali data sebelum menyelesaikan pendaftaran.
+                Periksa kembali data sebelum {isExistingMember ? 'menyelesaikan pembelian paket' : 'menyelesaikan pendaftaran'}.
             </div>
 
             {/* Member */}
             <div className="rounded-2xl border border-gray-100 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Member</p>
+                {isExistingMember && (
+                    <p className="mt-1 text-xs font-medium text-blue-600">Paket ditambahkan ke membership yang ada</p>
+                )}
                 <p className="mt-1 font-semibold text-gray-900">{memberInfo.name}</p>
                 <p className="text-sm text-gray-500">{memberInfo.phone}</p>
-                {memberInfo.address && <p className="text-sm text-gray-500">{memberInfo.address}</p>}
             </div>
 
             {/* Membership Details */}
@@ -108,7 +112,7 @@ export default function Step4Summary({
                     {processing ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...</>
                     ) : (
-                        'Complete Registration'
+                        isExistingMember ? 'Selesaikan Pembelian' : 'Selesaikan Pendaftaran'
                     )}
                 </Button>
             </div>

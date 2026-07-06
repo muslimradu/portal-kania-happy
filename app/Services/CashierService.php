@@ -21,6 +21,7 @@ class CashierService
 {
     public function __construct(
         private readonly InvoiceService $invoiceService,
+        private readonly MembershipDurationService $membershipDurationService,
     ) {}
 
     /**
@@ -34,11 +35,13 @@ class CashierService
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%");
             })
-            ->with(['activeMemberships' => function ($q) {
-                $q->where(function ($q) {
-                    $q->whereNull('end_date')->orWhere('end_date', '>=', Carbon::today());
-                })->orderBy('end_date');
-            }, 'activeMemberships.details.gymClass'])
+            ->with([
+                'activeMemberships' => function ($q) {
+                    $q->where(function ($q) {
+                        $q->whereNull('end_date')->orWhere('end_date', '>=', Carbon::today());
+                    })->with(['details.gymClass', 'membershipPackage:id,expired_type,expired_duration']);
+                },
+            ])
             ->orderBy('name')
             ->limit(10)
             ->get();
@@ -57,9 +60,14 @@ class CashierService
             ->where(function ($q) {
                 $q->whereNull('end_date')->orWhere('end_date', '>=', Carbon::today());
             })
-            ->with(['details' => fn ($q) => $q->where('gym_class_id', $gymClass->id), 'details.membership'])
-            ->orderByRaw('end_date IS NULL, end_date ASC')
-            ->get();
+            ->with([
+                'details' => fn ($q) => $q->where('gym_class_id', $gymClass->id),
+                'details.membership.membershipPackage',
+                'membershipPackage',
+            ])
+            ->get()
+            ->sortBy(fn (Membership $membership) => $this->membershipSelectionSortKey($membership))
+            ->values();
 
         foreach ($memberships as $membership) {
             $detail = $membership->details->first();
@@ -80,6 +88,26 @@ class CashierService
         return null;
     }
 
+    /**
+     * @return array{0: int, 1: int, 2: int}
+     */
+    private function membershipSelectionSortKey(Membership $membership): array
+    {
+        if ($membership->start_date !== null && $membership->end_date !== null) {
+            return [0, $membership->end_date->timestamp, $membership->created_at->timestamp];
+        }
+
+        if ($membership->start_date !== null && $membership->end_date === null) {
+            return [1, 0, $membership->created_at->timestamp];
+        }
+
+        return [
+            2,
+            $this->membershipDurationService->durationInDays($membership->membershipPackage),
+            $membership->created_at->timestamp,
+        ];
+    }
+
     public function checkIn(Member $member, GymClass $gymClass): Attendance
     {
         return DB::transaction(function () use ($member, $gymClass) {
@@ -88,6 +116,10 @@ class CashierService
             if (! $detail) {
                 throw new RuntimeException('Kuota habis. Silakan beli paket baru.');
             }
+
+            $membership = $detail->membership;
+            $this->membershipDurationService->activateOnFirstCheckIn($membership);
+            $membership->refresh();
 
             $quotaBefore = $detail->is_unlimited ? null : $detail->remainingQuota();
 

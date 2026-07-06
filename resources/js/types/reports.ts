@@ -63,6 +63,7 @@ export interface MembershipReportRow {
     member_phone: string;
     package_name: string;
     purchase_date: string | null;
+    activation_date: string | null;
     expired_date: string | null;
     current_status: 'active' | 'expired' | 'cancelled';
     remaining_quota: number | null;

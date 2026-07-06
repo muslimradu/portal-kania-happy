@@ -1,5 +1,11 @@
 import type { GymClass } from './gym-class';
 
+export interface MembershipPackageSummary {
+    id: number;
+    expired_type: string | null;
+    expired_duration: number | null;
+}
+
 export interface MembershipDetail {
     id: number;
     uuid: string;
@@ -23,6 +29,7 @@ export interface Membership {
     status: 'active' | 'expired' | 'cancelled';
     start_date: string | null;
     end_date: string | null;
+    membership_package?: MembershipPackageSummary | null;
     details: MembershipDetail[];
     created_at: string;
     updated_at: string;

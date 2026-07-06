@@ -22,22 +22,25 @@ class MemberRegistrationService
     ) {}
 
     /**
-     * @return array{member: Member, invoice: Invoice, memberships: Collection<int, Membership>}
+     * @return array{member: Member, invoice: Invoice, memberships: Collection<int, Membership>, is_new_member: bool}
      */
     public function register(array $data): array
     {
         return DB::transaction(function () use ($data) {
-            $member = Member::create([
-                'name' => $data['member']['name'],
-                'phone' => $this->memberService->normalizePhone($data['member']['phone']),
-                'gender' => $data['member']['gender'] ?? null,
-                'birth_date' => $data['member']['birth_date'] ?? null,
-                'address' => $data['member']['address'] ?? null,
-                'notes' => $data['member']['notes'] ?? null,
-                'is_active' => true,
-                'created_by' => auth()->id(),
-                'updated_by' => auth()->id(),
-            ]);
+            $isNewMember = empty($data['member_uuid']);
+
+            if ($isNewMember) {
+                $member = Member::create([
+                    'name' => $data['member']['name'],
+                    'phone' => $this->memberService->normalizePhone($data['member']['phone']),
+                    'gender' => $data['member']['gender'] ?? null,
+                    'is_active' => true,
+                    'created_by' => auth()->id(),
+                    'updated_by' => auth()->id(),
+                ]);
+            } else {
+                $member = Member::where('uuid', $data['member_uuid'])->firstOrFail();
+            }
 
             $packages = MembershipPackage::with('details.gymClass')
                 ->whereIn('id', $data['package_ids'])
@@ -63,15 +66,14 @@ class MemberRegistrationService
                 'category' => 'membership',
                 'amount' => $totalAmount,
                 'payment_method' => $data['payment_method'],
-                'description' => "Pendaftaran member {$member->name} - Invoice {$invoice->invoice_number}",
+                'description' => $isNewMember
+                    ? "Pendaftaran member {$member->name} - Invoice {$invoice->invoice_number}"
+                    : "Pembelian membership {$member->name} - Invoice {$invoice->invoice_number}",
                 'transaction_date' => Carbon::today(),
                 'created_by' => auth()->id(),
             ]);
 
             $memberships = $packages->map(function (MembershipPackage $package) use ($member, $invoice) {
-                $startDate = Carbon::today();
-                $endDate = $this->calculateEndDate($startDate, $package);
-
                 $membership = Membership::create([
                     'member_id' => $member->id,
                     'membership_package_id' => $package->id,
@@ -79,8 +81,8 @@ class MemberRegistrationService
                     'package_name' => $package->name,
                     'price' => $package->price,
                     'status' => 'active',
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
+                    'start_date' => null,
+                    'end_date' => null,
                     'created_by' => auth()->id(),
                     'updated_by' => auth()->id(),
                 ]);
@@ -111,18 +113,8 @@ class MemberRegistrationService
                 'member' => $member,
                 'invoice' => $invoice,
                 'memberships' => $memberships,
+                'is_new_member' => $isNewMember,
             ];
         });
-    }
-
-    private function calculateEndDate(Carbon $start, MembershipPackage $package): ?Carbon
-    {
-        return match ($package->expired_type) {
-            'days' => $start->copy()->addDays($package->expired_duration ?? 0),
-            'weeks' => $start->copy()->addWeeks($package->expired_duration ?? 0),
-            'months' => $start->copy()->addMonths($package->expired_duration ?? 0),
-            'years' => $start->copy()->addYears($package->expired_duration ?? 0),
-            default => null,
-        };
     }
 }

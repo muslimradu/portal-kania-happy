@@ -60,6 +60,7 @@ class MemberController extends Controller
         $member->load([
             'memberships' => fn ($q) => $q->orderByDesc('created_at'),
             'memberships.details.gymClass',
+            'memberships.membershipPackage:id,expired_type,expired_duration',
             'invoices' => fn ($q) => $q->orderByDesc('created_at'),
             'invoices.memberships',
             'invoices.paymentConfiguration',

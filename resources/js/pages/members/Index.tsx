@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Plus, Pencil, Trash2, RotateCcw, Users, Download } from 'lucide-react';
+import { Plus, Pencil, Trash2, RotateCcw, Users, Download, PackagePlus } from 'lucide-react';
 import AppLayout from '@/layouts/AppLayout';
 import PageHeader from '@/components/shared/PageHeader';
 import SearchInput from '@/components/shared/SearchInput';
@@ -29,6 +29,7 @@ export default function MemberIndex({ members, filters, packages, paymentConfigu
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
     const [registrationOpen, setRegistrationOpen] = useState(false);
+    const [addPackageTarget, setAddPackageTarget] = useState<Member | undefined>();
     const [editTarget, setEditTarget] = useState<Member | undefined>();
     const [deleteTarget, setDeleteTarget] = useState<Member | undefined>();
     const [restoreTarget, setRestoreTarget] = useState<Member | undefined>();
@@ -211,6 +212,15 @@ export default function MemberIndex({ members, filters, packages, paymentConfigu
                                                             </Button>
                                                         ) : (
                                                             <>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={() => setAddPackageTarget(member)}
+                                                                    className="rounded-lg text-violet-600 hover:bg-violet-50"
+                                                                    title="Tambah paket"
+                                                                >
+                                                                    <PackagePlus className="h-4 w-4" />
+                                                                </Button>
                                                                 <Button size="sm" variant="ghost" onClick={() => setEditTarget(member)} className="rounded-lg text-gray-500 hover:bg-gray-100">
                                                                     <Pencil className="h-4 w-4" />
                                                                 </Button>
@@ -255,6 +265,14 @@ export default function MemberIndex({ members, filters, packages, paymentConfigu
                 onOpenChange={setRegistrationOpen}
                 packages={packages}
                 paymentConfigurations={paymentConfigurations}
+            />
+
+            <RegistrationDialog
+                open={!!addPackageTarget}
+                onOpenChange={(open) => !open && setAddPackageTarget(undefined)}
+                packages={packages}
+                paymentConfigurations={paymentConfigurations}
+                existingMember={addPackageTarget}
             />
 
             {editTarget && (

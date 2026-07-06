@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Calendar, MapPin, Phone, StickyNote, Dumbbell, Pencil, History, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Dumbbell, Pencil, History, ShoppingBag, StickyNote } from 'lucide-react';
 import AppLayout from '@/layouts/AppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import MembershipQuotaDialog from './components/MembershipQuotaDialog';
 import type { Member } from '@/types/member';
 import type { Membership } from '@/types/membership';
+import { formatMemberMembershipExpiry } from '@/lib/membership-expiry';
 
 interface Props {
     member: Member;
@@ -68,50 +69,13 @@ export default function MemberShow({ member }: Props) {
                     )}
                 </div>
 
-                <Tabs defaultValue="profile">
+                <Tabs defaultValue="membership">
                     <TabsList variant="line" className="border-b border-gray-100">
-                        <TabsTrigger value="profile">Profile</TabsTrigger>
                         <TabsTrigger value="membership">Membership</TabsTrigger>
                         <TabsTrigger value="history">History</TabsTrigger>
                         <TabsTrigger value="attendance">Absensi</TabsTrigger>
                         <TabsTrigger value="timeline">Timeline</TabsTrigger>
                     </TabsList>
-
-                    {/* Profile Tab */}
-                    <TabsContent value="profile" className="mt-4">
-                        <div className="rounded-2xl bg-white p-6 shadow-sm">
-                            <div className="grid gap-5 sm:grid-cols-2">
-                                <div className="flex items-start gap-3">
-                                    <Phone className="mt-0.5 h-4 w-4 text-gray-400" />
-                                    <div>
-                                        <p className="text-xs text-gray-400">Nomor Telepon</p>
-                                        <p className="text-sm font-medium text-gray-900">{member.phone}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <Calendar className="mt-0.5 h-4 w-4 text-gray-400" />
-                                    <div>
-                                        <p className="text-xs text-gray-400">Tanggal Lahir</p>
-                                        <p className="text-sm font-medium text-gray-900">{formatDate(member.birth_date)}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3 sm:col-span-2">
-                                    <MapPin className="mt-0.5 h-4 w-4 text-gray-400" />
-                                    <div>
-                                        <p className="text-xs text-gray-400">Alamat</p>
-                                        <p className="text-sm font-medium text-gray-900">{member.address || '-'}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3 sm:col-span-2">
-                                    <StickyNote className="mt-0.5 h-4 w-4 text-gray-400" />
-                                    <div>
-                                        <p className="text-xs text-gray-400">Catatan</p>
-                                        <p className="text-sm font-medium text-gray-900">{member.notes || '-'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </TabsContent>
 
                     {/* Membership Tab */}
                     <TabsContent value="membership" className="mt-4">
@@ -131,7 +95,11 @@ export default function MemberShow({ member }: Props) {
                                             <div className="min-w-0">
                                                 <p className="truncate text-sm font-semibold text-gray-900">{membership.package_name}</p>
                                                 <p className="text-[11px] text-gray-400">
-                                                    {membership.end_date ? `Expired: ${formatDate(membership.end_date)}` : 'Expired: Manual'}
+                                                    {formatMemberMembershipExpiry(
+                                                        membership.start_date,
+                                                        membership.end_date,
+                                                        membership.membership_package,
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="flex shrink-0 items-center gap-1">
@@ -146,7 +114,7 @@ export default function MemberShow({ member }: Props) {
                                                     variant="ghost"
                                                     className="h-6 w-6 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700"
                                                     onClick={() => setQuotaTarget(membership)}
-                                                    title="Edit kuota"
+                                                    title="Edit paket"
                                                 >
                                                     <Pencil className="h-3.5 w-3.5" />
                                                 </Button>

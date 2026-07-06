@@ -6,6 +6,7 @@ import PageBreadcrumb from '@/components/layout/PageBreadcrumb';
 import GlobalSearchDialog from '@/components/layout/GlobalSearchDialog';
 import { useGlobalSearchShortcut } from '@/hooks/useGlobalSearch';
 import { useFlashToast } from '@/hooks/useFlashToast';
+import { useValidationErrorToast } from '@/hooks/useValidationErrorToast';
 
 interface AppLayoutProps extends PropsWithChildren {
     title?: string;
@@ -15,6 +16,7 @@ interface AppLayoutProps extends PropsWithChildren {
 export default function AppLayout({ children, breadcrumb }: AppLayoutProps) {
     useGlobalSearchShortcut();
     useFlashToast();
+    useValidationErrorToast();
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">

@@ -62,7 +62,7 @@ export default function Step2SelectPackage({ packages, selectedIds, onToggle, on
                                 <p className="mt-0.5 text-lg font-bold" style={{ color: 'var(--brand-primary)' }}>
                                     {formatCurrency(pkg.price)}
                                 </p>
-                                <p className="mt-1 text-xs text-gray-400">Expired: {formatExpired(pkg.expired_type, pkg.expired_duration)}</p>
+                                <p className="mt-1 text-xs text-gray-400">Masa aktif: {formatExpired(pkg.expired_type, pkg.expired_duration)} (dari check-in pertama)</p>
                                 <div className="mt-3 flex flex-wrap gap-1">
                                     {pkg.details.map((detail) => (
                                         <span

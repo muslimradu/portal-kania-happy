@@ -81,7 +81,21 @@ export default function MembershipTab({ data, filters, summary, membershipPackag
         { key: 'member_phone', header: 'No. Telepon' },
         { key: 'package_name', header: 'Paket', sortable: true },
         { key: 'purchase_date', header: 'Tanggal Beli', sortable: true, render: (row) => formatDateShort(row.purchase_date) },
-        { key: 'expired_date', header: 'Tanggal Berakhir', sortable: true, render: (row) => (row.expired_date ? formatDateShort(row.expired_date) : 'Manual') },
+        {
+            key: 'activation_date',
+            header: 'Tanggal Aktivasi',
+            sortable: true,
+            render: (row) => (row.activation_date ? formatDateShort(row.activation_date) : 'Belum check-in'),
+        },
+        {
+            key: 'expired_date',
+            header: 'Tanggal Berakhir',
+            sortable: true,
+            render: (row) => {
+                if (!row.activation_date) return '-';
+                return row.expired_date ? formatDateShort(row.expired_date) : 'Manual';
+            },
+        },
         {
             key: 'current_status',
             header: 'Status',

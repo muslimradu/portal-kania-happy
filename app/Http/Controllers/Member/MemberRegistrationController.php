@@ -21,15 +21,18 @@ class MemberRegistrationController extends Controller
     {
         $result = $this->registrationService->register($request->validated());
 
-        $member      = $result['member'];
-        $invoice     = $result['invoice'];
+        $member = $result['member'];
+        $invoice = $result['invoice'];
+        $isNewMember = $result['is_new_member'];
         $packageNames = $result['memberships']->pluck('package_name')->implode(', ');
 
-        $this->activityLogService->log(
-            module: 'members',
-            action: 'create',
-            description: "Mendaftarkan member baru: {$member->name}",
-        );
+        if ($isNewMember) {
+            $this->activityLogService->log(
+                module: 'members',
+                action: 'create',
+                description: "Mendaftarkan member baru: {$member->name}",
+            );
+        }
 
         $this->activityLogService->log(
             module: 'memberships',
@@ -37,11 +40,15 @@ class MemberRegistrationController extends Controller
             description: "Pembelian membership oleh {$member->name}: {$packageNames} (Invoice {$invoice->invoice_number})",
             properties: [
                 'invoice_number' => $invoice->invoice_number,
-                'total_amount'   => (string) $invoice->total_amount,
+                'total_amount' => (string) $invoice->total_amount,
                 'payment_method' => $invoice->payment_method,
             ],
         );
 
-        return back()->with('success', "Registrasi member {$member->name} berhasil. Invoice: {$invoice->invoice_number}");
+        $message = $isNewMember
+            ? "Registrasi member {$member->name} berhasil. Invoice: {$invoice->invoice_number}"
+            : "Paket membership berhasil ditambahkan untuk {$member->name}. Invoice: {$invoice->invoice_number}";
+
+        return back()->with('success', $message);
     }
 }

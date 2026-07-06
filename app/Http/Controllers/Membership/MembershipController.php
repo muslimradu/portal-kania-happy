@@ -20,14 +20,19 @@ class MembershipController extends Controller
 
     public function updateQuota(UpdateMembershipQuotaRequest $request, Membership $membership): RedirectResponse
     {
-        $membership = $this->membershipService->updateQuota($membership, $request->validated()['details']);
+        $validated = $request->validated();
+        $membership = $this->membershipService->updateQuota(
+            $membership,
+            $validated['details'],
+            array_intersect_key($validated, array_flip(['start_date', 'end_date', 'expired_type', 'expired_duration'])),
+        );
 
         $this->activityLogService->log(
             module: 'memberships',
             action: 'update',
-            description: "Mengubah kuota membership: {$membership->package_name} milik {$membership->member?->name}",
+            description: "Mengubah membership: {$membership->package_name} milik {$membership->member?->name}",
         );
 
-        return back()->with('success', "Kuota membership {$membership->package_name} berhasil diperbarui.");
+        return back()->with('success', "Membership {$membership->package_name} berhasil diperbarui.");
     }
 }

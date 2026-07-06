@@ -63,10 +63,10 @@ class ExportService
             ->get();
 
         return $this->stream('data-membership', 'Data Membership', function (Writer $writer) use ($memberships) {
-            $writer->addRow(Row::fromValues([
-                'Nama Member', 'Nomor Telepon', 'Paket', 'Harga', 'Status',
-                'Tanggal Mulai', 'Tanggal Berakhir', 'Detail Kuota', 'Dibuat Pada',
-            ]));
+                $writer->addRow(Row::fromValues([
+                    'Nama Member', 'Nomor Telepon', 'Paket', 'Harga', 'Status',
+                    'Tanggal Beli', 'Tanggal Aktivasi', 'Tanggal Berakhir', 'Detail Kuota', 'Dibuat Pada',
+                ]));
 
             foreach ($memberships as $membership) {
                 $quotaDetail = $membership->details->map(function ($detail) {
@@ -81,7 +81,8 @@ class ExportService
                     $membership->package_name,
                     (string) $membership->price,
                     ucfirst($membership->status),
-                    $membership->start_date?->format('d-m-Y') ?? '-',
+                    $membership->created_at->format('d-m-Y'),
+                    $membership->start_date?->format('d-m-Y') ?? 'Belum check-in',
                     $membership->end_date?->format('d-m-Y') ?? 'Manual',
                     $quotaDetail,
                     $membership->created_at->format('d-m-Y H:i'),
@@ -167,7 +168,7 @@ class ExportService
 
         return $this->stream($filename, 'Laporan Membership', function (Writer $writer) use ($rows, $statusLabels) {
             $writer->addRow(Row::fromValues([
-                'Nama Member', 'Nomor Telepon', 'Paket', 'Tanggal Beli', 'Tanggal Berakhir',
+                'Nama Member', 'Nomor Telepon', 'Paket', 'Tanggal Beli', 'Tanggal Aktivasi', 'Tanggal Berakhir',
                 'Status', 'Sisa Kuota', 'Unlimited', 'Check-In Terakhir',
             ]));
 
@@ -177,7 +178,8 @@ class ExportService
                     $row['member_phone'],
                     $row['package_name'],
                     $row['purchase_date'] ?? '-',
-                    $row['expired_date'] ?? 'Manual',
+                    $row['activation_date'] ?? 'Belum check-in',
+                    $row['activation_date'] ? ($row['expired_date'] ?? 'Manual') : '-',
                     $statusLabels[$row['current_status']] ?? $row['current_status'],
                     $row['is_unlimited'] ? 'Unlimited' : ($row['remaining_quota'] ?? 0),
                     $row['is_unlimited'] ? 'Ya' : 'Tidak',

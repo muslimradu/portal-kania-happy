@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\DB;
 
 class MembershipReportService
 {
-    private const SORTABLE = ['start_date', 'end_date', 'package_name', 'price'];
+    private const SORTABLE = ['created_at', 'start_date', 'end_date', 'package_name', 'price'];
 
     /**
      * @param  array<string, mixed>  $filters
      */
     public function paginate(array $filters, int $perPage = 15): LengthAwarePaginator
     {
-        $sortBy = in_array($filters['sort_by'] ?? '', self::SORTABLE, true) ? $filters['sort_by'] : 'start_date';
+        $sortBy = in_array($filters['sort_by'] ?? '', self::SORTABLE, true) ? $filters['sort_by'] : 'created_at';
         $sortDir = ($filters['sort_dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
 
         $paginator = $this->baseQuery($filters)
@@ -82,7 +82,7 @@ class MembershipReportService
     public function exportRows(array $filters): array
     {
         return $this->baseQuery($filters)
-            ->orderByDesc('start_date')
+            ->orderByDesc('created_at')
             ->get()
             ->map(fn (Membership $m) => $this->decorate($m))
             ->toArray();
@@ -131,10 +131,10 @@ class MembershipReportService
             $query->where('membership_package_id', $packageId);
         }
         if ($from) {
-            $query->where('start_date', '>=', $from);
+            $query->whereDate('created_at', '>=', $from);
         }
         if ($to) {
-            $query->where('start_date', '<=', $to);
+            $query->whereDate('created_at', '<=', $to);
         }
 
         if ($expiredStatus === 'active') {
@@ -185,7 +185,8 @@ class MembershipReportService
             'member_name' => $membership->member?->name ?? '-',
             'member_phone' => $membership->member?->phone ?? '-',
             'package_name' => $membership->package_name,
-            'purchase_date' => optional($membership->start_date)->toDateString(),
+            'purchase_date' => $membership->created_at?->toDateString(),
+            'activation_date' => optional($membership->start_date)->toDateString(),
             'expired_date' => optional($membership->end_date)->toDateString(),
             'current_status' => $this->computeStatus($membership),
             'remaining_quota' => $remainingQuota,

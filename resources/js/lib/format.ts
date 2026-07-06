@@ -15,6 +15,22 @@ export function formatDateShort(date: string | null | undefined): string {
     });
 }
 
+export function formatIsoDateToDdMmYyyy(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const [year, month, day] = iso.slice(0, 10).split('-');
+    if (!year || !month || !day) return '';
+    return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`;
+}
+
+export function parseDdMmYyyyToIso(value: string): string | null {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(trimmed);
+    if (!match) return null;
+    const [, day, month, year] = match;
+    return `${year}-${month}-${day}`;
+}
+
 export function formatDateTime(date: string | null | undefined): string {
     if (!date) return '-';
     return new Date(date).toLocaleString('id-ID', {

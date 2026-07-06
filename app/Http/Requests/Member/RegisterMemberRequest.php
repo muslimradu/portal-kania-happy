@@ -29,15 +29,22 @@ class RegisterMemberRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'member.name'       => ['required', 'string', 'max:100'],
-            'member.phone'      => ['required', 'string', 'max:20', 'regex:/^628[0-9]{6,15}$/', 'unique:members,phone'],
-            'member.gender'     => ['nullable', 'in:male,female'],
-            'member.birth_date' => ['nullable', 'date', 'before:today'],
-            'member.address'    => ['nullable', 'string', 'max:500'],
-            'member.notes'      => ['nullable', 'string', 'max:500'],
+        $isExistingMember = filled($this->input('member_uuid'));
 
-            'package_ids'   => ['required', 'array', 'min:1'],
+        return [
+            'member_uuid' => ['nullable', 'string', 'exists:members,uuid'],
+            'member.name' => [Rule::requiredIf(! $isExistingMember), 'nullable', 'string', 'max:100'],
+            'member.phone' => array_filter([
+                Rule::requiredIf(! $isExistingMember),
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^628[0-9]{6,15}$/',
+                ! $isExistingMember ? Rule::unique('members', 'phone') : null,
+            ]),
+            'member.gender' => ['nullable', 'in:male,female'],
+
+            'package_ids' => ['required', 'array', 'min:1'],
             'package_ids.*' => ['required', 'integer', 'exists:membership_packages,id'],
 
             'payment_method' => ['required', Rule::in(['cash', 'transfer', 'qris'])],
@@ -54,12 +61,12 @@ class RegisterMemberRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'member.name.required'  => 'Nama member wajib diisi.',
+            'member.name.required' => 'Nama member wajib diisi.',
             'member.phone.required' => 'Nomor telepon wajib diisi.',
-            'member.phone.regex'    => 'Nomor telepon harus diawali 628 dan berupa angka.',
-            'member.phone.unique'   => 'Nomor telepon sudah digunakan.',
-            'package_ids.required'  => 'Pilih minimal satu paket membership.',
-            'package_ids.min'       => 'Pilih minimal satu paket membership.',
+            'member.phone.regex' => 'Nomor telepon harus diawali 628 dan berupa angka.',
+            'member.phone.unique' => 'Nomor telepon sudah digunakan.',
+            'package_ids.required' => 'Pilih minimal satu paket membership.',
+            'package_ids.min' => 'Pilih minimal satu paket membership.',
             'payment_method.required' => 'Metode pembayaran wajib dipilih.',
             'payment_configuration_id.required_if' => 'Pilih rekening/QRIS tujuan pembayaran.',
         ];

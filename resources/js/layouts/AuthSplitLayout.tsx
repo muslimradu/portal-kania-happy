@@ -2,6 +2,7 @@ import { PropsWithChildren } from 'react';
 import { usePage } from '@inertiajs/react';
 import AppLogo from '@/components/AppLogo';
 import { Heart, Sparkles, Dumbbell } from 'lucide-react';
+import { useValidationErrorToast } from '@/hooks/useValidationErrorToast';
 
 interface AuthSplitLayoutProps extends PropsWithChildren {
     title: string;
@@ -10,6 +11,7 @@ interface AuthSplitLayoutProps extends PropsWithChildren {
 
 export default function AuthSplitLayout({ children, title, description }: AuthSplitLayoutProps) {
     const { settings } = usePage().props as any;
+    useValidationErrorToast();
 
     return (
         <div className="flex min-h-screen">
