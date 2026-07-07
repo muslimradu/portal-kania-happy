@@ -85,6 +85,17 @@ export default function CashierIndex({ gymClasses, paymentConfigurations, todayA
         setResult(null);
     }, []);
 
+    const startNewTransaction = useCallback(() => {
+        setCustomerType(null);
+        setNonMemberInfo(EMPTY_NON_MEMBER);
+        setSelectedMember(null);
+        setEligibility(null);
+        setPaymentMethod('cash');
+        setPaymentConfigurationId(null);
+        setResult(null);
+        setStep(2);
+    }, []);
+
     const canGoStep2 = Boolean(selectedGymClass);
     const canGoStep3 =
         customerType === 'non_member'
@@ -236,7 +247,13 @@ export default function CashierIndex({ gymClasses, paymentConfigurations, todayA
                                 />
                             )}
 
-                            {step === 5 && result && <StepCompleted result={result} onReset={resetWizard} />}
+                            {step === 5 && result && (
+                                <StepCompleted
+                                    result={result}
+                                    onNewTransaction={startNewTransaction}
+                                    onGoHome={resetWizard}
+                                />
+                            )}
                         </div>
                     </div>
 

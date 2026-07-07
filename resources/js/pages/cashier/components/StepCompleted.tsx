@@ -1,18 +1,14 @@
-import { useEffect } from 'react';
-import { CheckCircle2, Clock } from 'lucide-react';
+import { CheckCircle2, Clock, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { CashierResult } from '@/types/cashier';
 
 interface StepCompletedProps {
     result: CashierResult;
-    onReset: () => void;
+    onNewTransaction: () => void;
+    onGoHome: () => void;
 }
 
-export default function StepCompleted({ result, onReset }: StepCompletedProps) {
-    useEffect(() => {
-        const timeout = setTimeout(() => onReset(), 2000);
-        return () => clearTimeout(timeout);
-    }, [onReset]);
+export default function StepCompleted({ result, onNewTransaction, onGoHome }: StepCompletedProps) {
 
     const isCheckIn = result.type === 'checkin';
     const isPayLater = result.pay_later === true;
@@ -50,16 +46,25 @@ export default function StepCompleted({ result, onReset }: StepCompletedProps) {
                 </div>
             )}
 
-            <Button
-                type="button"
-                onClick={onReset}
-                className="mt-2 rounded-xl px-8"
-                style={{ backgroundColor: 'var(--brand-primary)' }}
-            >
-                Transaksi Baru
-            </Button>
-
-            <p className="text-xs text-gray-400">Halaman akan otomatis kembali dalam beberapa detik...</p>
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row">
+                <Button
+                    type="button"
+                    onClick={onNewTransaction}
+                    className="rounded-xl px-8"
+                    style={{ backgroundColor: 'var(--brand-primary)' }}
+                >
+                    Transaksi Baru
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onGoHome}
+                    className="rounded-xl px-8"
+                >
+                    <Home className="mr-2 h-4 w-4" />
+                    Kembali ke Home
+                </Button>
+            </div>
         </div>
     );
 }
