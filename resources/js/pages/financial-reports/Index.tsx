@@ -17,6 +17,9 @@ interface Props {
     filters: FinancialFilters;
     summary: FinancialSummary;
     periodComparison: PeriodComparison;
+    gymClasses: Array<{ id: number; name: string }>;
+    membershipPackages: Array<{ id: number; name: string }>;
+    trainings: Array<{ id: number; title: string }>;
 }
 
 const CATEGORY_BADGE: Record<string, string> = {
@@ -48,8 +51,11 @@ function PeriodCard({ title, icon: Icon, value, trend }: { title: string; icon: 
     );
 }
 
-export default function FinancialReportIndex({ transactions, filters, summary, periodComparison }: Props) {
+export default function FinancialReportIndex({ transactions, filters, summary, periodComparison, gymClasses, membershipPackages, trainings }: Props) {
     usePollingReload(['transactions', 'summary', 'periodComparison'], 20000);
+    const showGymClassFilter = filters.category === 'pos_sale';
+    const showMembershipPackageFilter = filters.category === 'membership';
+    const showTrainingFilter = filters.category === 'training';
 
     const applyFilters = (params: Partial<FinancialFilters>) => {
         router.get(route('financial-reports.index'), { ...filters, ...params, page: undefined }, { preserveState: true, replace: true });
@@ -133,7 +139,15 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                 <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center">
                     <select
                         value={filters.category ?? ''}
-                        onChange={(e) => applyFilters({ category: e.target.value || undefined })}
+                        onChange={(e) => {
+                            const category = e.target.value || undefined;
+                            applyFilters({
+                                category,
+                                gym_class_id: category === 'pos_sale' ? filters.gym_class_id : undefined,
+                                membership_package_id: category === 'membership' ? filters.membership_package_id : undefined,
+                                training_id: category === 'training' ? filters.training_id : undefined,
+                            });
+                        }}
                         className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
                     >
                         <option value="">Semua Kategori</option>
@@ -142,6 +156,48 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                         <option value="studio_booking">Booking</option>
                         <option value="training">Pelatihan</option>
                     </select>
+                    {showGymClassFilter && (
+                        <select
+                            value={filters.gym_class_id ?? ''}
+                            onChange={(e) => applyFilters({ gym_class_id: e.target.value || undefined })}
+                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                        >
+                            <option value="">Semua Jenis Gym</option>
+                            {gymClasses.map((gymClass) => (
+                                <option key={gymClass.id} value={gymClass.id}>
+                                    {gymClass.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                    {showMembershipPackageFilter && (
+                        <select
+                            value={filters.membership_package_id ?? ''}
+                            onChange={(e) => applyFilters({ membership_package_id: e.target.value || undefined })}
+                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                        >
+                            <option value="">Semua Paket</option>
+                            {membershipPackages.map((pkg) => (
+                                <option key={pkg.id} value={pkg.id}>
+                                    {pkg.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                    {showTrainingFilter && (
+                        <select
+                            value={filters.training_id ?? ''}
+                            onChange={(e) => applyFilters({ training_id: e.target.value || undefined })}
+                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                        >
+                            <option value="">Semua Pelatihan</option>
+                            {trainings.map((training) => (
+                                <option key={training.id} value={training.id}>
+                                    {training.title}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                     <select
                         value={filters.payment_method ?? ''}
                         onChange={(e) => applyFilters({ payment_method: e.target.value || undefined })}

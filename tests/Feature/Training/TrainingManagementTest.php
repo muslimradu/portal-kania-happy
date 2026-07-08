@@ -210,6 +210,46 @@ class TrainingManagementTest extends TestCase
         );
     }
 
+    public function test_financial_report_can_filter_training_transactions_by_training(): void
+    {
+        Carbon::setTestNow('2026-06-01');
+        $admin = $this->admin();
+        $pilates = $this->createTraining(['title' => 'Basic Mat Pilates']);
+        $zumba = $this->createTraining(['title' => 'Zumba Instructor']);
+
+        $this->actingAs($admin)->post(route('training-participants.store'), [
+            'full_name' => 'Fitria',
+            'phone' => '081234567890',
+            'training_uuid' => $pilates->uuid,
+            'payment_method' => 'cash',
+            'selected_training_dates' => ['2026-12-06'],
+        ])->assertRedirect();
+
+        $this->actingAs($admin)->post(route('training-participants.store'), [
+            'full_name' => 'Budi',
+            'phone' => '081234567891',
+            'training_uuid' => $zumba->uuid,
+            'payment_method' => 'cash',
+            'selected_training_dates' => ['2026-12-06'],
+        ])->assertRedirect();
+
+        $response = $this->actingAs($admin)->get(route('financial-reports.index', [
+            'category' => 'training',
+            'training_id' => $zumba->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('financial-reports/Index')
+            ->where('filters.category', 'training')
+            ->where('filters.training_id', (string) $zumba->id)
+            ->has('trainings', 2)
+            ->has('transactions.data', 1)
+            ->where('transactions.data.0.category', 'training')
+            ->where('transactions.data.0.customer_name', 'Budi')
+        );
+    }
+
     public function test_dashboard_includes_active_trainings(): void
     {
         Carbon::setTestNow('2026-06-01');

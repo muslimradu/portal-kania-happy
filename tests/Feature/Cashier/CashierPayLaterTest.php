@@ -125,4 +125,40 @@ class CashierPayLaterTest extends TestCase
         $this->assertSame(75000.0, $list[0]['amount']);
         $this->assertSame($transaction->invoice_number, $list[0]['invoice_number']);
     }
+
+    public function test_financial_report_can_filter_gym_transactions_by_gym_class(): void
+    {
+        Carbon::setTestNow('2026-07-06 10:00:00');
+        $admin = $this->admin();
+        $pilates = $this->createGymClass(['name' => 'Pilates Mat']);
+        $zumba = $this->createGymClass(['name' => 'Zumba']);
+
+        $this->actingAs($admin)->post(route('cashier.transactions.store'), [
+            'gym_class_uuid' => $pilates->uuid,
+            'customer_name' => 'Siti Aminah',
+            'payment_method' => 'cash',
+        ])->assertRedirect();
+
+        $this->actingAs($admin)->post(route('cashier.transactions.store'), [
+            'gym_class_uuid' => $zumba->uuid,
+            'customer_name' => 'Budi Santoso',
+            'payment_method' => 'cash',
+        ])->assertRedirect();
+
+        $response = $this->actingAs($admin)->get(route('financial-reports.index', [
+            'category' => 'pos_sale',
+            'gym_class_id' => $zumba->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('financial-reports/Index')
+            ->where('filters.category', 'pos_sale')
+            ->where('filters.gym_class_id', (string) $zumba->id)
+            ->has('gymClasses', 2)
+            ->has('transactions.data', 1)
+            ->where('transactions.data.0.category', 'pos_sale')
+            ->where('transactions.data.0.customer_name', 'Budi Santoso')
+        );
+    }
 }

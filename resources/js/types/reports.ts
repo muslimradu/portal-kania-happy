@@ -107,6 +107,9 @@ export interface FinancialReportRow {
 
 export interface FinancialFilters {
     category?: string;
+    gym_class_id?: string;
+    membership_package_id?: string;
+    training_id?: string;
     payment_method?: string;
     date_preset?: string;
     date_from?: string;

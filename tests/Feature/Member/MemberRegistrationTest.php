@@ -114,4 +114,45 @@ class MemberRegistrationTest extends TestCase
         $this->assertSame(1, Member::count());
         $this->assertSame(1, Membership::where('member_id', $existing->id)->count());
     }
+
+    public function test_financial_report_can_filter_membership_transactions_by_package(): void
+    {
+        $packageA = $this->createPackage();
+        $packageB = MembershipPackage::create([
+            'name' => 'Paket 3 Bulan',
+            'price' => 750000,
+            'expired_type' => 'months',
+            'expired_duration' => 3,
+            'is_active' => true,
+        ]);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->post(route('members.register'), [
+            'member' => ['name' => 'Budi Santoso', 'phone' => '6281234567890'],
+            'package_ids' => [$packageA->id],
+            'payment_method' => 'cash',
+        ])->assertRedirect();
+
+        $this->actingAs($admin)->post(route('members.register'), [
+            'member' => ['name' => 'Siti Aminah', 'phone' => '6289876543211'],
+            'package_ids' => [$packageB->id],
+            'payment_method' => 'cash',
+        ])->assertRedirect();
+
+        $response = $this->actingAs($admin)->get(route('financial-reports.index', [
+            'category' => 'membership',
+            'membership_package_id' => $packageB->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('financial-reports/Index')
+            ->where('filters.category', 'membership')
+            ->where('filters.membership_package_id', (string) $packageB->id)
+            ->has('membershipPackages', 2)
+            ->has('transactions.data', 1)
+            ->where('transactions.data.0.category', 'membership')
+            ->where('transactions.data.0.customer_name', 'Siti Aminah')
+        );
+    }
 }

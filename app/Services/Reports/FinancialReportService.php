@@ -224,6 +224,9 @@ class FinancialReportService
     private function baseQuery(array $filters): Builder
     {
         $category = $filters['category'] ?? null;
+        $gymClassId = $filters['gym_class_id'] ?? null;
+        $membershipPackageId = $filters['membership_package_id'] ?? null;
+        $trainingId = $filters['training_id'] ?? null;
         $paymentMethod = $filters['payment_method'] ?? null;
 
         [$from, $to] = ReportDateRange::resolve(
@@ -243,6 +246,20 @@ class FinancialReportService
 
         if ($category) {
             $query->where('ft.category', $category);
+        }
+        if ($gymClassId && $category === 'pos_sale') {
+            $query->where('t.gym_class_id', $gymClassId);
+        }
+        if ($membershipPackageId && $category === 'membership') {
+            $query->whereExists(function ($sub) use ($membershipPackageId) {
+                $sub->select(DB::raw(1))
+                    ->from('memberships')
+                    ->whereColumn('memberships.invoice_id', 'ft.invoice_id')
+                    ->where('memberships.membership_package_id', $membershipPackageId);
+            });
+        }
+        if ($trainingId && $category === 'training') {
+            $query->where('tp.training_id', $trainingId);
         }
         if ($paymentMethod) {
             $query->where('ft.payment_method', $paymentMethod);
