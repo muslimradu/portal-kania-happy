@@ -84,21 +84,7 @@ class CashierController extends Controller
         $member = Member::where('uuid', $request->string('member_uuid'))->firstOrFail();
         $gymClass = GymClass::where('uuid', $request->string('gym_class_uuid'))->firstOrFail();
 
-        $detail = $this->cashierService->resolveEligibleDetail($member, $gymClass);
-
-        if (! $detail) {
-            return response()->json([
-                'eligible' => false,
-                'message' => 'Kuota habis. Silakan beli paket baru.',
-            ]);
-        }
-
-        return response()->json([
-            'eligible' => true,
-            'is_unlimited' => $detail->is_unlimited,
-            'remaining_quota' => $detail->remainingQuota(),
-            'package_name' => $detail->membership->package_name ?? null,
-        ]);
+        return response()->json($this->cashierService->checkEligibility($member, $gymClass));
     }
 
     public function checkIn(StoreCheckInRequest $request): RedirectResponse

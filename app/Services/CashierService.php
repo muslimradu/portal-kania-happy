@@ -47,11 +47,6 @@ class CashierService
             ->get();
     }
 
-    /**
-     * Cari MembershipDetail yang berhak dipakai untuk gym class tertentu,
-     * mengikuti aturan FIFO (membership dengan expiry paling dekat didahulukan).
-     * Unlimited selalu diprioritaskan tanpa mengurangi kuota jika ditemukan pada urutan FIFO tsb.
-     */
     public function resolveEligibleDetail(Member $member, GymClass $gymClass): ?MembershipDetail
     {
         $memberships = Membership::query()
@@ -90,6 +85,52 @@ class CashierService
         return null;
     }
 
+    public function hasUsableMembership(Member $member): bool
+    {
+        return Membership::query()
+            ->where('member_id', $member->id)
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('end_date')->orWhere('end_date', '>=', Carbon::today());
+            })
+            ->exists();
+    }
+
+    /**
+     * @return array{eligible: bool, is_unlimited?: bool, remaining_quota?: int|null, package_name?: string|null, title?: string, message?: string, reason?: string}
+     */
+    public function checkEligibility(Member $member, GymClass $gymClass): array
+    {
+        $detail = $this->resolveEligibleDetail($member, $gymClass);
+
+        if ($detail) {
+            $pool = $detail->quotaPool();
+
+            return [
+                'eligible' => true,
+                'is_unlimited' => $pool->is_unlimited,
+                'remaining_quota' => $pool->remainingQuota(),
+                'package_name' => $detail->membership->package_name ?? null,
+            ];
+        }
+
+        if (! $this->hasUsableMembership($member)) {
+            return [
+                'eligible' => false,
+                'title' => 'Tidak Ada Membership Aktif',
+                'message' => 'Silahkan beli paket membership',
+                'reason' => 'no_membership',
+            ];
+        }
+
+        return [
+            'eligible' => false,
+            'title' => 'Kuota habis',
+            'message' => 'Kuota habis. Silakan beli paket baru.',
+            'reason' => 'quota_exhausted',
+        ];
+    }
+
     /**
      * @return array{0: int, 1: int, 2: int}
      */
@@ -116,6 +157,10 @@ class CashierService
             $detail = $this->resolveEligibleDetail($member, $gymClass);
 
             if (! $detail) {
+                if (! $this->hasUsableMembership($member)) {
+                    throw new RuntimeException('Silahkan beli paket membership');
+                }
+
                 throw new RuntimeException('Kuota habis. Silakan beli paket baru.');
             }
 

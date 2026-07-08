@@ -54,3 +54,22 @@ export function formatMemberMembershipExpiry(
     if (!endDate) return 'Exp: Tanpa batas';
     return `Exp: ${new Date(endDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`;
 }
+
+export function getMembershipDisplayStatus(
+    status: 'active' | 'expired' | 'cancelled',
+    endDate: string | null,
+): 'active' | 'expired' | 'cancelled' {
+    if (status === 'cancelled') {
+        return 'cancelled';
+    }
+
+    if (!endDate) {
+        return 'active';
+    }
+
+    const end = new Date(`${endDate.slice(0, 10)}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return end < today ? 'expired' : 'active';
+}

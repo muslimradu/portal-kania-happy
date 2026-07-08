@@ -89,6 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Memberships
     Route::prefix('memberships')->name('memberships.')->group(function () {
         Route::patch('/{membership}/quota', [MembershipController::class, 'updateQuota'])->name('update-quota');
+        Route::delete('/{membership}', [MembershipController::class, 'destroy'])->name('destroy');
     });
 
     // Cashier

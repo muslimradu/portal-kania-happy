@@ -26,6 +26,9 @@ class MembershipDurationService
                 : null,
             'updated_by' => auth()->id(),
         ]);
+
+        $membership->refresh();
+        $membership->syncExpiredStatus();
     }
 
     public function calculateEndDate(Carbon $start, MembershipPackage $package): ?Carbon

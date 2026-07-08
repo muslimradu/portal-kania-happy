@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Dumbbell, Pencil, History, ShoppingBag, StickyNote } from 'lucide-react';
+import { ArrowLeft, Dumbbell, Pencil, History, ShoppingBag, StickyNote, Trash2 } from 'lucide-react';
 import AppLayout from '@/layouts/AppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import EmptyState from '@/components/shared/EmptyState';
 import MembershipQuotaDialog from './components/MembershipQuotaDialog';
+import DeleteMembershipDialog from './components/DeleteMembershipDialog';
 import type { Member } from '@/types/member';
 import type { Membership } from '@/types/membership';
-import { formatMemberMembershipExpiry } from '@/lib/membership-expiry';
+import { formatMemberMembershipExpiry, getMembershipDisplayStatus } from '@/lib/membership-expiry';
 import { formatCurrency } from '@/lib/format';
 import { detailsToGroups, formatGroupLabel } from '@/lib/membership-package-groups';
 
@@ -37,8 +38,9 @@ const STATUS_COLORS: Record<string, string> = { active: '#16a34a', expired: '#6b
 const STATUS_LABELS: Record<string, string> = { active: 'Aktif', expired: 'Expired', cancelled: 'Dibatalkan' };
 
 export default function MemberShow({ member }: Props) {
-    const activeMemberships = (member.memberships ?? []).filter((m) => m.status === 'active');
+    const visibleMemberships = (member.memberships ?? []).filter((m) => m.status !== 'cancelled');
     const [quotaTarget, setQuotaTarget] = useState<Membership | undefined>();
+    const [deleteTarget, setDeleteTarget] = useState<Membership | undefined>();
 
     return (
         <AppLayout breadcrumb={[{ label: 'Daftar Member', href: route('members.index') }, { label: member.name }]}>
@@ -77,17 +79,20 @@ export default function MemberShow({ member }: Props) {
 
                     {/* Membership Tab */}
                     <TabsContent value="membership" className="mt-4">
-                        {activeMemberships.length === 0 ? (
+                        {visibleMemberships.length === 0 ? (
                             <div className="rounded-2xl bg-white shadow-sm">
                                 <EmptyState
                                     icon={Dumbbell}
-                                    title="Belum ada membership aktif"
-                                    description="Member ini belum memiliki paket membership yang sedang aktif."
+                                    title="Belum ada membership"
+                                    description="Member ini belum memiliki paket membership."
                                 />
                             </div>
                         ) : (
                             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                {activeMemberships.map((membership) => (
+                                {visibleMemberships.map((membership) => {
+                                    const displayStatus = getMembershipDisplayStatus(membership.status, membership.end_date);
+
+                                    return (
                                     <div key={membership.uuid} className="rounded-xl bg-white p-3.5 shadow-sm">
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="min-w-0">
@@ -103,9 +108,9 @@ export default function MemberShow({ member }: Props) {
                                             <div className="flex shrink-0 items-center gap-1">
                                                 <Badge
                                                     className="rounded-full text-[11px] text-white"
-                                                    style={{ backgroundColor: STATUS_COLORS[membership.status] }}
+                                                    style={{ backgroundColor: STATUS_COLORS[displayStatus] }}
                                                 >
-                                                    {STATUS_LABELS[membership.status]}
+                                                    {STATUS_LABELS[displayStatus]}
                                                 </Badge>
                                                 <Button
                                                     size="icon"
@@ -115,6 +120,15 @@ export default function MemberShow({ member }: Props) {
                                                     title="Edit paket"
                                                 >
                                                     <Pencil className="h-3.5 w-3.5" />
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-6 w-6 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600"
+                                                    onClick={() => setDeleteTarget(membership)}
+                                                    title="Hapus membership"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
                                                 </Button>
                                             </div>
                                         </div>
@@ -149,7 +163,8 @@ export default function MemberShow({ member }: Props) {
                                             })}
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </TabsContent>
@@ -292,6 +307,14 @@ export default function MemberShow({ member }: Props) {
                     open={!!quotaTarget}
                     onOpenChange={(open) => !open && setQuotaTarget(undefined)}
                     membership={quotaTarget}
+                />
+            )}
+
+            {deleteTarget && (
+                <DeleteMembershipDialog
+                    open={!!deleteTarget}
+                    onOpenChange={(open) => !open && setDeleteTarget(undefined)}
+                    membership={deleteTarget}
                 />
             )}
         </AppLayout>

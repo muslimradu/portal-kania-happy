@@ -23,7 +23,9 @@ export interface EligibilityResult {
     is_unlimited?: boolean;
     remaining_quota?: number | null;
     package_name?: string | null;
+    title?: string;
     message?: string;
+    reason?: 'no_membership' | 'quota_exhausted';
 }
 
 export type CustomerType = 'member' | 'non_member';

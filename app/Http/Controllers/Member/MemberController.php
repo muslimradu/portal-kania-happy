@@ -14,6 +14,7 @@ use App\Models\PaymentConfiguration;
 use App\Services\ActivityLogService;
 use App\Services\ExportService;
 use App\Services\MemberService;
+use App\Services\MembershipService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,6 +27,7 @@ class MemberController extends Controller
 
     public function __construct(
         private readonly MemberService $memberService,
+        private readonly MembershipService $membershipService,
         private readonly ActivityLogService $activityLogService,
         private readonly ExportService $exportService,
     ) {}
@@ -57,6 +59,8 @@ class MemberController extends Controller
 
     public function show(Member $member): Response
     {
+        $this->membershipService->syncExpiredStatusesForMember($member->id);
+
         $member->load([
             'memberships' => fn ($q) => $q->orderByDesc('created_at'),
             'memberships.details.gymClass',

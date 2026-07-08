@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Membership extends Model
 {
@@ -74,6 +75,31 @@ class Membership extends Model
 
     public function isExpired(): bool
     {
-        return $this->end_date !== null && $this->end_date->isPast();
+        return $this->end_date !== null && $this->end_date->lt(Carbon::today());
+    }
+
+    public function computeStatus(): string
+    {
+        if ($this->status === 'cancelled') {
+            return 'cancelled';
+        }
+
+        return $this->isExpired() ? 'expired' : 'active';
+    }
+
+    public function syncExpiredStatus(): void
+    {
+        if ($this->status === 'cancelled') {
+            return;
+        }
+
+        $computed = $this->computeStatus();
+
+        if ($this->status !== $computed) {
+            $this->update([
+                'status' => $computed,
+                'updated_by' => auth()->id(),
+            ]);
+        }
     }
 }

@@ -144,7 +144,7 @@ export default function Step2Customer({
                             )}
 
                             {!eligibilityLoading && eligibility && !eligibility.eligible && (
-                                <QuotaExhaustedAlert message={eligibility.message} />
+                                <QuotaExhaustedAlert title={eligibility.title} message={eligibility.message} />
                             )}
 
                             {!eligibilityLoading && eligibility?.eligible && (

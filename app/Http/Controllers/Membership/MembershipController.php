@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Membership;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Membership\DeleteMembershipRequest;
 use App\Http\Requests\Membership\UpdateMembershipQuotaRequest;
 use App\Models\Membership;
 use App\Services\ActivityLogService;
@@ -34,5 +35,21 @@ class MembershipController extends Controller
         );
 
         return back()->with('success', "Membership {$membership->package_name} berhasil diperbarui.");
+    }
+
+    public function destroy(DeleteMembershipRequest $request, Membership $membership): RedirectResponse
+    {
+        $packageName = $membership->package_name;
+        $memberName = $membership->member?->name;
+
+        $this->membershipService->delete($membership);
+
+        $this->activityLogService->log(
+            module: 'memberships',
+            action: 'delete',
+            description: "Menghapus membership: {$packageName} milik {$memberName}",
+        );
+
+        return back()->with('success', "Membership {$packageName} berhasil dihapus.");
     }
 }
