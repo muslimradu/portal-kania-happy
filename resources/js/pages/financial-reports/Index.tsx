@@ -88,6 +88,15 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                 </Badge>
             ),
         },
+        {
+            key: 'sub_category',
+            header: 'Sub Kategori',
+            render: (row) => (
+                <span className="block max-w-[10rem] truncate text-gray-700" title={row.sub_category}>
+                    {row.sub_category}
+                </span>
+            ),
+        },
         { key: 'customer_name', header: 'Pelanggan', render: (row) => <span className="font-medium text-gray-900">{row.customer_name}</span> },
         { key: 'payment_method', header: 'Metode Bayar', render: (row) => (row.payment_method ? PAYMENT_METHOD_LABELS[row.payment_method] : '-') },
         { key: 'amount', header: 'Jumlah', sortable: true, render: (row) => formatCurrency(row.amount) },
@@ -160,7 +169,8 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                         <select
                             value={filters.gym_class_id ?? ''}
                             onChange={(e) => applyFilters({ gym_class_id: e.target.value || undefined })}
-                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                            className="max-w-48 truncate rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                            title={gymClasses.find((g) => String(g.id) === filters.gym_class_id)?.name}
                         >
                             <option value="">Semua Jenis Gym</option>
                             {gymClasses.map((gymClass) => (
@@ -174,7 +184,8 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                         <select
                             value={filters.membership_package_id ?? ''}
                             onChange={(e) => applyFilters({ membership_package_id: e.target.value || undefined })}
-                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                            className="max-w-48 truncate rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                            title={membershipPackages.find((p) => String(p.id) === filters.membership_package_id)?.name}
                         >
                             <option value="">Semua Paket</option>
                             {membershipPackages.map((pkg) => (
@@ -188,7 +199,8 @@ export default function FinancialReportIndex({ transactions, filters, summary, p
                         <select
                             value={filters.training_id ?? ''}
                             onChange={(e) => applyFilters({ training_id: e.target.value || undefined })}
-                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                            className="max-w-48 truncate rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+                            title={trainings.find((t) => String(t.id) === filters.training_id)?.title}
                         >
                             <option value="">Semua Pelatihan</option>
                             {trainings.map((training) => (

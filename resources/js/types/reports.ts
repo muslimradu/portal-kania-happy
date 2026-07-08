@@ -98,6 +98,7 @@ export interface FinancialReportRow {
     invoice_number: string;
     category: 'pos_sale' | 'membership' | 'studio_booking' | 'training';
     category_label: string;
+    sub_category: string;
     customer_name: string;
     payment_method: 'cash' | 'transfer' | 'qris' | null;
     amount: number;

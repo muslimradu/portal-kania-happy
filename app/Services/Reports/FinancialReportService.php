@@ -271,12 +271,20 @@ class FinancialReportService
             $query->where('ft.transaction_date', '<=', $to->toDateString());
         }
 
+        $membershipPackagesSql = DB::connection()->getDriverName() === 'sqlite'
+            ? "(SELECT GROUP_CONCAT(DISTINCT ms.package_name) FROM memberships ms WHERE ms.invoice_id = ft.invoice_id AND ft.invoice_id IS NOT NULL)"
+            : "(SELECT GROUP_CONCAT(DISTINCT ms.package_name ORDER BY ms.package_name SEPARATOR ' / ') FROM memberships ms WHERE ms.invoice_id = ft.invoice_id AND ft.invoice_id IS NOT NULL)";
+
         $query->select([
             'ft.id', 'ft.uuid', 'ft.category', 'ft.amount', 'ft.payment_method', 'ft.transaction_date', 'ft.description',
             'ft.transaction_id', 'ft.studio_booking_id', 'ft.invoice_id', 'ft.training_participant_id',
             DB::raw('COALESCE(t.invoice_number, sb.invoice_number, inv.invoice_number, tp.invoice_number) as invoice_number'),
             DB::raw('COALESCE(t.customer_name, sb.customer_name, m.name, tp.full_name) as customer_name'),
+            't.class_name as gym_class_name',
             'tr.title as training_title',
+            DB::raw("{$membershipPackagesSql} as membership_packages"),
+            'sb.booking_date as booking_date',
+            'sb.start_time as booking_start_time',
         ]);
 
         return $query;
@@ -311,12 +319,27 @@ class FinancialReportService
 
     private function decorate(object $row): array
     {
+        $subCategory = match ($row->category) {
+            'pos_sale' => $row->gym_class_name ?? null,
+            'membership' => isset($row->membership_packages)
+                ? (DB::connection()->getDriverName() === 'sqlite'
+                    ? str_replace(',', ' / ', (string) $row->membership_packages)
+                    : (string) $row->membership_packages)
+                : null,
+            'training' => $row->training_title ?? null,
+            'studio_booking' => $row->booking_date
+                ? Carbon::parse("{$row->booking_date} {$row->booking_start_time}")->format('d/m/Y H:i')
+                : null,
+            default => null,
+        };
+
         return [
             'uuid' => $row->uuid,
             'transaction_date' => $row->transaction_date,
             'invoice_number' => $this->filled($row->invoice_number ?? null) ? (string) $row->invoice_number : '-',
             'category' => $row->category,
             'category_label' => self::CATEGORY_LABELS[$row->category] ?? $row->category,
+            'sub_category' => $this->filled($subCategory) ? (string) $subCategory : '-',
             'customer_name' => $this->filled($row->customer_name ?? null) ? (string) $row->customer_name : '-',
             'payment_method' => $row->payment_method,
             'amount' => (float) $row->amount,
