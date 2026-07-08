@@ -1,12 +1,5 @@
 import type { BookingStatus, PaymentStatus, StudioBooking } from '@/types/booking';
-
-export function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
+export { formatCurrency } from '@/lib/format';
 
 export function formatTime(time: string): string {
     return time.slice(0, 5);

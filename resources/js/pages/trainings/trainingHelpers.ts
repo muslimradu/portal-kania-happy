@@ -1,13 +1,6 @@
 import type { TrainingStatus } from '@/types/training';
 import type { TrainingPaymentStatus, TrainingPaymentMethod } from '@/types/training-participant';
-
-export function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
+export { formatCurrency } from '@/lib/format';
 
 export function formatTrainingDates(dates: string[]): string {
     if (!dates?.length) return '-';

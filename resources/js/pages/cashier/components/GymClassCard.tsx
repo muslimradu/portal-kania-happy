@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import type { CashierGymClass } from '@/types/cashier';
+import { formatCurrency } from '@/lib/format';
 
 interface GymClassCardProps {
     gymClass: CashierGymClass;
@@ -8,13 +9,6 @@ interface GymClassCardProps {
     onSelect: () => void;
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 function resolveIcon(iconName: string, color: string): React.ReactNode {
     if (/\p{Emoji}/u.test(iconName)) {

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import type { MembershipPackage } from '@/types/membership-package';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
 import type { RegistrationStep1Values } from '@/lib/validations/member-registration';
+import { formatCurrency } from '@/lib/format';
 
 interface Step4SummaryProps {
     memberInfo: RegistrationStep1Values;
@@ -15,13 +16,6 @@ interface Step4SummaryProps {
     onSubmit: () => void;
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 const PAYMENT_LABELS: Record<string, string> = { cash: 'Cash', transfer: 'Transfer Bank', qris: 'QRIS' };
 

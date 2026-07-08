@@ -91,7 +91,7 @@ class PaymentConfigurationService
 
     public function delete(PaymentConfiguration $payment): void
     {
-        DB::transaction(fn () => $payment->delete());
+        $payment->delete();
     }
 
     public function restore(string $uuid): PaymentConfiguration

@@ -1,4 +1,5 @@
 import * as LucideIcons from 'lucide-react';
+import { formatCurrency } from '@/lib/format';
 
 interface GymClassPreviewCardProps {
     name: string;
@@ -8,13 +9,6 @@ interface GymClassPreviewCardProps {
     isActive: boolean;
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 function resolveIcon(iconName: string): React.ReactNode {
     if (/\p{Emoji}/u.test(iconName)) {

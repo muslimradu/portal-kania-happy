@@ -155,7 +155,7 @@ class TrainingParticipantService
 
     public function delete(TrainingParticipant $participant): void
     {
-        DB::transaction(fn () => $participant->delete());
+        $participant->delete();
     }
 
     public function restore(string $uuid): TrainingParticipant

@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\GymClass;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Support\AppliesListStatusFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -20,10 +21,7 @@ class GymClassService
     ): LengthAwarePaginator {
         return GymClass::withTrashed()
             ->when($search, fn (Builder $q) => $q->where('name', 'like', "%{$search}%"))
-            ->when($status === 'active', fn (Builder $q) => $q->where('is_active', true)->whereNull('deleted_at'))
-            ->when($status === 'inactive', fn (Builder $q) => $q->where('is_active', false)->whereNull('deleted_at'))
-            ->when($status === 'trashed', fn (Builder $q) => $q->whereNotNull('deleted_at'))
-            ->when(! $status, fn (Builder $q) => $q->whereNull('deleted_at'))
+            ->tap(fn (Builder $q) => AppliesListStatusFilter::apply($q, $status))
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->withQueryString();
@@ -53,7 +51,7 @@ class GymClassService
 
     public function delete(GymClass $gymClass): void
     {
-        DB::transaction(fn () => $gymClass->delete());
+        $gymClass->delete();
     }
 
     public function restore(string $uuid): GymClass

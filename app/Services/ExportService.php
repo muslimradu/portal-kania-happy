@@ -294,23 +294,28 @@ class ExportService
         $filename = 'Financial_Report_'.Carbon::today()->format('Y-m-d');
 
         return $this->stream($filename, 'Laporan Keuangan', function (Writer $writer) use ($rows) {
-            $writer->addRow(Row::fromValues([
+            $this->writeTable($writer, [
                 'Tanggal Transaksi', 'No. Invoice', 'Kategori', 'Pelanggan',
                 'Metode Pembayaran', 'Jumlah', 'Status',
-            ]));
-
-            foreach ($rows as $row) {
-                $writer->addRow(Row::fromValues([
-                    $row['transaction_date'],
-                    $row['invoice_number'],
-                    $row['category_label'],
-                    $row['customer_name'],
-                    $row['payment_method'] ? ucfirst($row['payment_method']) : '-',
-                    (string) $row['amount'],
-                    $row['status'],
-                ]));
-            }
+            ], array_map(fn ($row) => [
+                $row['transaction_date'],
+                $row['invoice_number'],
+                $row['category_label'],
+                $row['customer_name'],
+                $row['payment_method'] ? ucfirst($row['payment_method']) : '-',
+                (string) $row['amount'],
+                $row['status'],
+            ], $rows));
         });
+    }
+
+    private function writeTable(Writer $writer, array $headers, iterable $rows): void
+    {
+        $writer->addRow(Row::fromValues($headers));
+
+        foreach ($rows as $row) {
+            $writer->addRow(Row::fromValues($row));
+        }
     }
 
     private function stream(string $filename, string $reportTitle, callable $callback): StreamedResponse

@@ -2,16 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Models\Setting;
-use Illuminate\Support\Facades\Cache;
+use App\Services\SettingsService;
 
 if (! function_exists('setting')) {
     function setting(string $key, mixed $default = null): mixed
     {
-        return Cache::rememberForever("setting:{$key}", function () use ($key, $default) {
-            $setting = Setting::where('key', $key)->first();
-
-            return $setting ? $setting->getTypedValue() : $default;
-        });
+        return app(SettingsService::class)->get($key, $default);
     }
 }

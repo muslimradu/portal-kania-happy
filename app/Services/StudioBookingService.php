@@ -257,7 +257,7 @@ class StudioBookingService
 
     public function delete(StudioBooking $booking): void
     {
-        DB::transaction(fn () => $booking->delete());
+        $booking->delete();
     }
 
     public function restore(string $uuid): StudioBooking

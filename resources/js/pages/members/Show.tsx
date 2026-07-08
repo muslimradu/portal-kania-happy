@@ -10,13 +10,10 @@ import MembershipQuotaDialog from './components/MembershipQuotaDialog';
 import type { Member } from '@/types/member';
 import type { Membership } from '@/types/membership';
 import { formatMemberMembershipExpiry } from '@/lib/membership-expiry';
+import { formatCurrency } from '@/lib/format';
 
 interface Props {
     member: Member;
-}
-
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
 }
 
 function formatDate(value: string | null): string {

@@ -2,6 +2,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { CashierGymClass, CashierMember, CashierPaymentMethod, CustomerType, NonMemberInfo } from '@/types/cashier';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
+import { formatCurrency } from '@/lib/format';
 
 interface Step4SummaryProps {
     gymClass: CashierGymClass;
@@ -16,13 +17,6 @@ interface Step4SummaryProps {
     onSubmit: () => void;
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 const METHOD_LABELS: Record<string, string> = { cash: 'Cash', transfer: 'Transfer', qris: 'QRIS', pay_later: 'Bayar Nanti' };
 

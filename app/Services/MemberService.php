@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Member;
+use App\Support\AppliesListStatusFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -37,10 +38,7 @@ class MemberService
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%");
             }))
-            ->when($status === 'active', fn (Builder $q) => $q->where('is_active', true)->whereNull('deleted_at'))
-            ->when($status === 'inactive', fn (Builder $q) => $q->where('is_active', false)->whereNull('deleted_at'))
-            ->when($status === 'trashed', fn (Builder $q) => $q->whereNotNull('deleted_at'))
-            ->when(! $status, fn (Builder $q) => $q->whereNull('deleted_at'))
+            ->tap(fn (Builder $q) => AppliesListStatusFilter::apply($q, $status))
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->withQueryString();
@@ -75,7 +73,7 @@ class MemberService
 
     public function delete(Member $member): void
     {
-        DB::transaction(fn () => $member->delete());
+        $member->delete();
     }
 
     public function restore(string $uuid): Member

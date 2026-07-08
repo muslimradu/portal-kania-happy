@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import PackageFormDialog from './components/PackageFormDialog';
 import type { MembershipPackage, MembershipPackagePagination, MembershipPackageFilters } from '@/types/membership-package';
 import type { GymClass } from '@/types/gym-class';
+import { formatCurrency } from '@/lib/format';
 
 interface Props {
     packages: MembershipPackagePagination;
@@ -18,13 +19,6 @@ interface Props {
     filters: MembershipPackageFilters;
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 function formatExpired(type: string, duration: number | null): string {
     if (type === 'manual') return 'Manual';

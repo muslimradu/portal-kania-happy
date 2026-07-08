@@ -1,6 +1,7 @@
 import * as LucideIcons from 'lucide-react';
 import type { MembershipPackageDetailFormValues } from '@/lib/validations/membership-package';
 import type { GymClass } from '@/types/gym-class';
+import { formatCurrency } from '@/lib/format';
 
 interface PackagePreviewCardProps {
     name: string;
@@ -11,13 +12,6 @@ interface PackagePreviewCardProps {
     gymClasses: GymClass[];
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 function formatExpired(type: string, duration: number | null): string {
     if (type === 'manual') return 'Manual';

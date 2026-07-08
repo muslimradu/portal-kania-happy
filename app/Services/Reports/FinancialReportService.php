@@ -294,108 +294,17 @@ class FinancialReportService
 
     private function decorate(object $row): array
     {
-        [$invoiceNumber, $customerName] = $this->resolveDisplayFields($row);
-
         return [
             'uuid' => $row->uuid,
             'transaction_date' => $row->transaction_date,
-            'invoice_number' => $invoiceNumber ?: '-',
+            'invoice_number' => $this->filled($row->invoice_number ?? null) ? (string) $row->invoice_number : '-',
             'category' => $row->category,
             'category_label' => self::CATEGORY_LABELS[$row->category] ?? $row->category,
-            'customer_name' => $customerName ?: '-',
+            'customer_name' => $this->filled($row->customer_name ?? null) ? (string) $row->customer_name : '-',
             'payment_method' => $row->payment_method,
             'amount' => (float) $row->amount,
             'status' => 'Lunas',
         ];
-    }
-
-    /**
-     * Resolve invoice number and customer name from joined sources, with description
-     * parsing and orphan-link repair as fallbacks.
-     *
-     * @return array{0: ?string, 1: ?string}
-     */
-    private function resolveDisplayFields(object $row): array
-    {
-        $invoiceNumber = $this->filled($row->invoice_number ?? null) ? (string) $row->invoice_number : null;
-        $customerName = $this->filled($row->customer_name ?? null) ? (string) $row->customer_name : null;
-
-        if ($invoiceNumber && $customerName) {
-            return [$invoiceNumber, $customerName];
-        }
-
-        if (! $invoiceNumber && ! $customerName && $row->category === 'pos_sale' && empty($row->transaction_id)) {
-            [$linkedInvoice, $linkedName] = $this->repairOrphanPosSaleLink($row);
-            $invoiceNumber = $invoiceNumber ?: $linkedInvoice;
-            $customerName = $customerName ?: $linkedName;
-        }
-
-        if (! $invoiceNumber || ! $customerName) {
-            [$parsedInvoice, $parsedName] = $this->parseDescriptionFields(
-                (string) ($row->description ?? ''),
-                (string) ($row->category ?? ''),
-            );
-            $invoiceNumber = $invoiceNumber ?: $parsedInvoice;
-            $customerName = $customerName ?: $parsedName;
-        }
-
-        return [$invoiceNumber, $customerName];
-    }
-
-    /**
-     * Attempt to link an orphaned pos_sale ledger row back to its cashier transaction.
-     *
-     * @return array{0: ?string, 1: ?string}
-     */
-    private function repairOrphanPosSaleLink(object $row): array
-    {
-        if (! preg_match('/Transaksi kasir non member:\s*(.+?)\s*-\s*(.+)$/u', (string) ($row->description ?? ''), $matches)) {
-            return [null, null];
-        }
-
-        $className = trim($matches[1]);
-        $customerName = trim($matches[2]);
-
-        $transaction = DB::table('transactions')
-            ->whereNull('deleted_at')
-            ->where('customer_name', $customerName)
-            ->where('class_name', $className)
-            ->where('amount', $row->amount)
-            ->where('payment_method', $row->payment_method)
-            ->whereDate('created_at', $row->transaction_date)
-            ->orderByDesc('id')
-            ->first();
-
-        if (! $transaction) {
-            return [null, $customerName];
-        }
-
-        return [(string) $transaction->invoice_number, (string) $transaction->customer_name];
-    }
-
-    /**
-     * @return array{0: ?string, 1: ?string}
-     */
-    private function parseDescriptionFields(string $description, string $category): array
-    {
-        $invoiceNumber = null;
-        $customerName = null;
-
-        if (preg_match('/Invoice\s+(INV-\d{8}-\d{4})/i', $description, $matches)) {
-            $invoiceNumber = $matches[1];
-        }
-
-        if ($category === 'pos_sale' && preg_match('/Transaksi kasir non member:\s*.+?\s*-\s*(.+)$/u', $description, $matches)) {
-            $customerName = trim($matches[1]);
-        } elseif ($category === 'membership' && preg_match('/Pendaftaran member\s+(.+?)\s*-\s*Invoice/u', $description, $matches)) {
-            $customerName = trim($matches[1]);
-        } elseif ($category === 'studio_booking' && preg_match('/Booking sanggar:\s*(.+?)\s*\(/u', $description, $matches)) {
-            $customerName = trim($matches[1]);
-        } elseif ($category === 'training' && preg_match('/Pelatihan:\s*(.+?)\s*-\s*(.+?)\s*\(Invoice/u', $description, $matches)) {
-            $customerName = trim($matches[1]);
-        }
-
-        return [$invoiceNumber, $customerName];
     }
 
     private function filled(?string $value): bool

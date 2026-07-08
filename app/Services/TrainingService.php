@@ -89,7 +89,7 @@ class TrainingService
 
     public function delete(Training $training): void
     {
-        DB::transaction(fn () => $training->delete());
+        $training->delete();
     }
 
     public function restore(string $uuid): Training

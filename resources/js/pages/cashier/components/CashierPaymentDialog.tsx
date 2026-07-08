@@ -9,18 +9,12 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import TrainingPaymentMethodSelector from '@/pages/training-participants/components/TrainingPaymentMethodSelector';
+import PaymentMethodSelector from '@/components/shared/PaymentMethodSelector';
 import type { TodayAttendanceRow } from '@/types/cashier';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
-import type { TrainingPaymentMethod } from '@/types/training-participant';
+import type { SharedPaymentMethod } from '@/components/shared/PaymentMethodSelector';
+import { formatCurrency } from '@/lib/format';
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 interface CashierPaymentDialogProps {
     open: boolean;
@@ -35,7 +29,7 @@ export default function CashierPaymentDialog({
     row,
     paymentConfigurations,
 }: CashierPaymentDialogProps) {
-    const [paymentMethod, setPaymentMethod] = useState<TrainingPaymentMethod>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<SharedPaymentMethod>('cash');
     const [paymentConfigurationId, setPaymentConfigurationId] = useState<number | null>(null);
     const [processing, setProcessing] = useState(false);
 
@@ -84,7 +78,7 @@ export default function CashierPaymentDialog({
                         </div>
                     </div>
 
-                    <TrainingPaymentMethodSelector
+                    <PaymentMethodSelector
                         paymentConfigurations={paymentConfigurations}
                         paymentMethod={paymentMethod}
                         paymentConfigurationId={paymentConfigurationId}

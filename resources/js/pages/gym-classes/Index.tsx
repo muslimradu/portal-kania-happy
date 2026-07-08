@@ -11,19 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import GymClassFormDialog from './components/GymClassFormDialog';
 import type { GymClass, GymClassPagination, GymClassFilters } from '@/types/gym-class';
+import { formatCurrency } from '@/lib/format';
 
 interface Props {
     gymClasses: GymClassPagination;
     filters: GymClassFilters;
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 function GymClassIcon({ icon, color }: { icon: string; color: string }) {
     if (/\p{Emoji}/u.test(icon)) {

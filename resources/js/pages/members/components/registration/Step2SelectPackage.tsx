@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MembershipPackage } from '@/types/membership-package';
+import { formatCurrency } from '@/lib/format';
 
 interface Step2SelectPackageProps {
     packages: MembershipPackage[];
@@ -10,13 +11,6 @@ interface Step2SelectPackageProps {
     onNext: () => void;
 }
 
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 function formatExpired(type: string, duration: number | null): string {
     if (type === 'manual') return 'Manual';
