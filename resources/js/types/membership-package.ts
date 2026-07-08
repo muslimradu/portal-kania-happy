@@ -5,6 +5,7 @@ export interface MembershipPackageDetail {
     uuid: string;
     membership_package_id: number;
     gym_class_id: number;
+    quota_group: number | null;
     quota: number | null;
     is_unlimited: boolean;
     gym_class?: GymClass;

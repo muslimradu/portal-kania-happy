@@ -15,6 +15,7 @@ class MembershipDetail extends Model
     protected $fillable = [
         'membership_id',
         'gym_class_id',
+        'quota_group',
         'class_name',
         'quota',
         'quota_used',
@@ -24,6 +25,7 @@ class MembershipDetail extends Model
     protected function casts(): array
     {
         return [
+            'quota_group'  => 'integer',
             'quota'        => 'integer',
             'quota_used'   => 'integer',
             'is_unlimited' => 'boolean',
@@ -45,12 +47,27 @@ class MembershipDetail extends Model
         return $this->belongsTo(GymClass::class);
     }
 
+    public function quotaPool(): self
+    {
+        if ($this->quota_group === null) {
+            return $this;
+        }
+
+        $pool = $this->membership?->details
+            ->where('quota_group', $this->quota_group)
+            ->first(fn (self $detail) => $detail->quota !== null || $detail->is_unlimited);
+
+        return $pool ?? $this;
+    }
+
     public function remainingQuota(): ?int
     {
-        if ($this->is_unlimited) {
+        $pool = $this->quotaPool();
+
+        if ($pool->is_unlimited) {
             return null;
         }
 
-        return max(0, ($this->quota ?? 0) - $this->quota_used);
+        return max(0, ($pool->quota ?? 0) - $pool->quota_used);
     }
 }

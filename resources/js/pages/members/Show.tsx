@@ -11,6 +11,7 @@ import type { Member } from '@/types/member';
 import type { Membership } from '@/types/membership';
 import { formatMemberMembershipExpiry } from '@/lib/membership-expiry';
 import { formatCurrency } from '@/lib/format';
+import { detailsToGroups, formatGroupLabel } from '@/lib/membership-package-groups';
 
 interface Props {
     member: Member;
@@ -118,20 +119,34 @@ export default function MemberShow({ member }: Props) {
                                             </div>
                                         </div>
                                         <div className="mt-2.5 space-y-1.5">
-                                            {membership.details.map((detail) => (
-                                                <div key={detail.uuid} className="flex items-center justify-between rounded-lg bg-gray-50 px-2.5 py-1.5 text-xs">
-                                                    <span className="flex items-center gap-1.5 text-gray-700">
-                                                        <span
-                                                            className="h-2 w-2 shrink-0 rounded-full"
-                                                            style={{ backgroundColor: detail.gym_class?.color_label ?? '#6b7280' }}
-                                                        />
-                                                        {detail.class_name}
-                                                    </span>
-                                                    <span className="font-medium text-gray-900">
-                                                        {detail.is_unlimited ? 'Unlimited' : `${detail.quota_used}/${detail.quota}`}
-                                                    </span>
-                                                </div>
-                                            ))}
+                                            {detailsToGroups(membership.details.map((detail) => ({
+                                                gym_class_id: detail.gym_class_id ?? 0,
+                                                quota: detail.quota,
+                                                is_unlimited: detail.is_unlimited,
+                                                quota_group: detail.quota_group,
+                                            }))).map((group, index) => {
+                                                const pool = membership.details.find((detail) =>
+                                                    detail.gym_class_id === group.gym_class_ids[0] && (detail.quota != null || detail.is_unlimited),
+                                                ) ?? membership.details.find((detail) => detail.gym_class_id === group.gym_class_ids[0]);
+
+                                                return (
+                                                    <div key={`${membership.uuid}-${index}`} className="flex items-center justify-between rounded-lg bg-gray-50 px-2.5 py-1.5 text-xs">
+                                                        <span className="flex items-center gap-1.5 text-gray-700">
+                                                            <span
+                                                                className="h-2 w-2 shrink-0 rounded-full"
+                                                                style={{ backgroundColor: pool?.gym_class?.color_label ?? '#6b7280' }}
+                                                            />
+                                                            {formatGroupLabel(
+                                                                group,
+                                                                group.gym_class_ids.map((id) => membership.details.find((detail) => detail.gym_class_id === id)?.class_name ?? 'Kelas'),
+                                                            )}
+                                                        </span>
+                                                        <span className="font-medium text-gray-900">
+                                                            {pool?.is_unlimited ? 'Unlimited' : `${pool?.quota_used ?? 0}/${pool?.quota ?? 0}`}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 ))}

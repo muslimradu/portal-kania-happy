@@ -4,6 +4,7 @@ import type { MembershipPackage } from '@/types/membership-package';
 import type { PaymentConfiguration } from '@/types/payment-configuration';
 import type { RegistrationStep1Values } from '@/lib/validations/member-registration';
 import { formatCurrency } from '@/lib/format';
+import { detailsToGroups, formatGroupLabel } from '@/lib/membership-package-groups';
 
 interface Step4SummaryProps {
     memberInfo: RegistrationStep1Values;
@@ -59,13 +60,18 @@ export default function Step4Summary({
                                 <p className="font-semibold text-gray-900">{formatCurrency(Number(pkg.price))}</p>
                             </div>
                             <div className="mt-2 flex flex-wrap gap-1">
-                                {pkg.details.map((detail) => (
+                                {detailsToGroups(pkg.details.map((detail) => ({
+                                    gym_class_id: detail.gym_class_id,
+                                    quota: detail.quota,
+                                    is_unlimited: detail.is_unlimited,
+                                    quota_group: detail.quota_group,
+                                }))).map((group, index) => (
                                     <span
-                                        key={detail.uuid}
+                                        key={index}
                                         className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
-                                        style={{ backgroundColor: detail.gym_class?.color_label ?? '#6b7280' }}
+                                        style={{ backgroundColor: pkg.details.find((detail) => detail.gym_class_id === group.gym_class_ids[0])?.gym_class?.color_label ?? '#6b7280' }}
                                     >
-                                        {detail.gym_class?.name} · {detail.is_unlimited ? 'Unlimited' : `${detail.quota}x`}
+                                        {formatGroupLabel(group, group.gym_class_ids.map((id) => pkg.details.find((detail) => detail.gym_class_id === id)?.gym_class?.name ?? 'Kelas'))}
                                     </span>
                                 ))}
                             </div>

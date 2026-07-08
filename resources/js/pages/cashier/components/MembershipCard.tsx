@@ -1,5 +1,22 @@
-import type { Membership } from '@/types/membership';
+import type { Membership, MembershipDetail } from '@/types/membership';
 import { formatCashierMembershipExpiry } from '@/lib/membership-expiry';
+
+function quotaPool(detail: MembershipDetail, details: MembershipDetail[]): MembershipDetail {
+    if (detail.quota_group == null) {
+        return detail;
+    }
+
+    return details.find((item) => item.quota_group === detail.quota_group && (item.quota != null || item.is_unlimited)) ?? detail;
+}
+
+function remainingQuota(detail: MembershipDetail, details: MembershipDetail[]): number | null {
+    const pool = quotaPool(detail, details);
+    if (pool.is_unlimited) {
+        return null;
+    }
+
+    return Math.max(0, (pool.quota ?? 0) - pool.quota_used);
+}
 
 interface MembershipCardProps {
     membership: Membership;
@@ -22,7 +39,7 @@ export default function MembershipCard({ membership, activeGymClassId }: Members
             <div className="mt-2 flex flex-wrap gap-1.5">
                 {membership.details.map((detail) => {
                     const isHighlighted = activeGymClassId != null && detail.gym_class_id === activeGymClassId;
-                    const remaining = detail.is_unlimited ? null : Math.max(0, (detail.quota ?? 0) - detail.quota_used);
+                    const remaining = remainingQuota(detail, membership.details);
                     return (
                         <span
                             key={detail.uuid}

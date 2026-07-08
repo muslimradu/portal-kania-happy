@@ -76,7 +76,8 @@ class MembershipPackageService
         foreach ($details as $detail) {
             $package->details()->create([
                 'gym_class_id' => $detail['gym_class_id'],
-                'quota'        => $detail['is_unlimited'] ? null : $detail['quota'],
+                'quota_group'  => $detail['quota_group'] ?? null,
+                'quota'        => $detail['is_unlimited'] ? null : ($detail['quota'] ?? null),
                 'is_unlimited' => $detail['is_unlimited'],
             ]);
         }

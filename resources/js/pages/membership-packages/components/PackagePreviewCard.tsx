@@ -1,5 +1,5 @@
 import * as LucideIcons from 'lucide-react';
-import type { MembershipPackageDetailFormValues } from '@/lib/validations/membership-package';
+import { formatGroupLabel, type PackageGroup } from '@/lib/membership-package-groups';
 import type { GymClass } from '@/types/gym-class';
 import { formatCurrency } from '@/lib/format';
 
@@ -8,10 +8,9 @@ interface PackagePreviewCardProps {
     price: number;
     expiredType: string;
     expiredDuration: number | null;
-    details: MembershipPackageDetailFormValues[];
+    groups: PackageGroup[];
     gymClasses: GymClass[];
 }
-
 
 function formatExpired(type: string, duration: number | null): string {
     if (type === 'manual') return 'Manual';
@@ -30,7 +29,7 @@ export default function PackagePreviewCard({
     price,
     expiredType,
     expiredDuration,
-    details,
+    groups,
     gymClasses,
 }: PackagePreviewCardProps) {
     return (
@@ -45,37 +44,32 @@ export default function PackagePreviewCard({
                 </p>
             </div>
 
-            {details.length === 0 ? (
+            {groups.length === 0 ? (
                 <p className="text-center text-xs text-gray-300">Belum ada kelas ditambahkan</p>
             ) : (
                 <div className="space-y-2">
-                    {details.map((detail, index) => {
-                        const gymClass = gymClasses.find((g) => g.id === detail.gym_class_id);
-                        if (!gymClass) return null;
-
-                        const Icon = (LucideIcons as unknown as Record<string, React.ComponentType<any>>)[gymClass.icon];
+                    {groups.map((group, index) => {
+                        const classNames = group.gym_class_ids.map((id) => gymClasses.find((g) => g.id === id)?.name ?? 'Kelas');
+                        const primaryClass = gymClasses.find((g) => g.id === group.gym_class_ids[0]);
+                        const Icon = primaryClass
+                            ? (LucideIcons as unknown as Record<string, React.ComponentType<any>>)[primaryClass.icon]
+                            : null;
 
                         return (
-                            <div key={index} className="flex items-center gap-3 rounded-xl p-2" style={{ backgroundColor: gymClass.color_label + '10' }}>
+                            <div key={index} className="flex items-center gap-3 rounded-xl p-2" style={{ backgroundColor: (primaryClass?.color_label ?? '#6b7280') + '10' }}>
                                 <div
                                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                                    style={{ backgroundColor: gymClass.color_label + '20' }}
+                                    style={{ backgroundColor: (primaryClass?.color_label ?? '#6b7280') + '20' }}
                                 >
                                     {Icon ? (
-                                        <Icon className="h-4 w-4" style={{ color: gymClass.color_label }} />
+                                        <Icon className="h-4 w-4" style={{ color: primaryClass?.color_label }} />
                                     ) : (
-                                        <span className="text-sm">{gymClass.icon}</span>
+                                        <span className="text-sm">{primaryClass?.icon ?? '•'}</span>
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm font-medium text-gray-900">{gymClass.name}</p>
+                                    <p className="text-sm font-medium text-gray-900">{formatGroupLabel(group, classNames)}</p>
                                 </div>
-                                <span
-                                    className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
-                                    style={{ backgroundColor: gymClass.color_label }}
-                                >
-                                    {detail.is_unlimited ? '∞' : `${detail.quota}x`}
-                              </span>
                             </div>
                         );
                     })}

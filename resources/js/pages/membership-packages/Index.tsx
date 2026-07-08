@@ -12,6 +12,7 @@ import PackageFormDialog from './components/PackageFormDialog';
 import type { MembershipPackage, MembershipPackagePagination, MembershipPackageFilters } from '@/types/membership-package';
 import type { GymClass } from '@/types/gym-class';
 import { formatCurrency } from '@/lib/format';
+import { detailsToGroups, formatGroupLabel } from '@/lib/membership-package-groups';
 
 interface Props {
     packages: MembershipPackagePagination;
@@ -175,13 +176,18 @@ export default function MembershipPackageIndex({ packages, gymClasses, filters }
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex flex-wrap gap-1">
-                                                    {item.details.map((detail) => (
+                                                    {detailsToGroups(item.details.map((detail) => ({
+                                                        gym_class_id: detail.gym_class_id,
+                                                        quota: detail.quota,
+                                                        is_unlimited: detail.is_unlimited,
+                                                        quota_group: detail.quota_group,
+                                                    }))).map((group, index) => (
                                                         <span
-                                                            key={detail.uuid}
+                                                            key={index}
                                                             className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
-                                                            style={{ backgroundColor: detail.gym_class?.color_label ?? '#6b7280' }}
+                                                            style={{ backgroundColor: item.details.find((detail) => detail.gym_class_id === group.gym_class_ids[0])?.gym_class?.color_label ?? '#6b7280' }}
                                                         >
-                                                            {detail.gym_class?.name} · {detail.is_unlimited ? '∞' : `${detail.quota}x`}
+                                                            {formatGroupLabel(group, group.gym_class_ids.map((id) => item.details.find((detail) => detail.gym_class_id === id)?.gym_class?.name ?? 'Kelas'))}
                                                         </span>
                                                     ))}
                                                 </div>

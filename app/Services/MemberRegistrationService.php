@@ -90,6 +90,7 @@ class MemberRegistrationService
                 foreach ($package->details as $detail) {
                     $membership->details()->create([
                         'gym_class_id' => $detail->gym_class_id,
+                        'quota_group' => $detail->quota_group,
                         'class_name' => $detail->gymClass?->name ?? 'Umum',
                         'quota' => $detail->is_unlimited ? null : $detail->quota,
                         'quota_used' => 0,

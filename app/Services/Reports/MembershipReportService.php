@@ -178,7 +178,9 @@ class MembershipReportService
         $isUnlimited = $details->contains(fn ($d) => (bool) $d->is_unlimited);
         $remainingQuota = $isUnlimited
             ? null
-            : (int) $details->sum(fn ($d) => max(0, (int) $d->quota - (int) $d->quota_used));
+            : (int) $details
+                ->filter(fn ($d) => $d->quota_group === null || $d->quota !== null)
+                ->sum(fn ($d) => $d->remainingQuota());
 
         return [
             'uuid' => $membership->uuid,

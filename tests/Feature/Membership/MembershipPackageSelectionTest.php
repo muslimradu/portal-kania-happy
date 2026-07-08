@@ -213,4 +213,99 @@ class MembershipPackageSelectionTest extends TestCase
         $this->assertNotNull($newPurchase->start_date);
         $this->assertSame('2026-07-10', $newPurchase->start_date->toDateString());
     }
+
+    public function test_shared_quota_group_depletes_across_classes(): void
+    {
+        Carbon::setTestNow('2026-07-10 10:00:00');
+        $admin = $this->admin();
+
+        $aerobic = GymClass::create([
+            'name' => 'Aerobic',
+            'price' => 25000,
+            'color_label' => '#7C3AED',
+            'icon' => 'Dumbbell',
+            'is_active' => true,
+        ]);
+        $zumba = GymClass::create([
+            'name' => 'Zumba',
+            'price' => 30000,
+            'color_label' => '#F97316',
+            'icon' => 'Music',
+            'is_active' => true,
+        ]);
+
+        $package = MembershipPackage::create([
+            'name' => 'Aero & Zumba 4x',
+            'price' => 300000,
+            'expired_type' => 'months',
+            'expired_duration' => 1,
+            'is_active' => true,
+        ]);
+
+        MembershipPackageDetail::create([
+            'membership_package_id' => $package->id,
+            'gym_class_id' => $aerobic->id,
+            'quota_group' => 1,
+            'quota' => 4,
+            'is_unlimited' => false,
+        ]);
+        MembershipPackageDetail::create([
+            'membership_package_id' => $package->id,
+            'gym_class_id' => $zumba->id,
+            'quota_group' => 1,
+            'quota' => null,
+            'is_unlimited' => false,
+        ]);
+
+        $member = Member::create([
+            'name' => 'Rani',
+            'phone' => '6287777888999',
+            'is_active' => true,
+            'created_by' => $admin->id,
+            'updated_by' => $admin->id,
+        ]);
+
+        $membership = Membership::create([
+            'member_id' => $member->id,
+            'membership_package_id' => $package->id,
+            'package_name' => $package->name,
+            'price' => $package->price,
+            'status' => 'active',
+            'start_date' => '2026-07-01',
+            'end_date' => '2026-08-01',
+        ]);
+
+        $pool = MembershipDetail::create([
+            'membership_id' => $membership->id,
+            'gym_class_id' => $aerobic->id,
+            'quota_group' => 1,
+            'class_name' => 'Aerobic',
+            'quota' => 4,
+            'quota_used' => 0,
+            'is_unlimited' => false,
+        ]);
+        MembershipDetail::create([
+            'membership_id' => $membership->id,
+            'gym_class_id' => $zumba->id,
+            'quota_group' => 1,
+            'class_name' => 'Zumba',
+            'quota' => null,
+            'quota_used' => 0,
+            'is_unlimited' => false,
+        ]);
+
+        $this->actingAs($admin);
+        $cashier = app(CashierService::class);
+
+        $cashier->checkIn($member, $zumba);
+        $cashier->checkIn($member, $zumba);
+        $cashier->checkIn($member, $aerobic);
+        $cashier->checkIn($member, $aerobic);
+
+        $pool->refresh();
+        $this->assertSame(4, $pool->quota_used);
+
+        $this->expectException(\RuntimeException::class);
+        $cashier->checkIn($member, $zumba);
+    }
 }

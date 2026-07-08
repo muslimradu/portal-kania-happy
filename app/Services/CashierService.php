@@ -76,11 +76,13 @@ class CashierService
                 continue;
             }
 
-            if ($detail->is_unlimited) {
+            $pool = $detail->quotaPool();
+
+            if ($pool->is_unlimited) {
                 return $detail;
             }
 
-            if (($detail->quota ?? 0) - $detail->quota_used > 0) {
+            if ($pool->remainingQuota() > 0) {
                 return $detail;
             }
         }
@@ -121,14 +123,15 @@ class CashierService
             $this->membershipDurationService->activateOnFirstCheckIn($membership);
             $membership->refresh();
 
-            $quotaBefore = $detail->is_unlimited ? null : $detail->remainingQuota();
+            $pool = $detail->quotaPool();
+            $quotaBefore = $pool->is_unlimited ? null : $pool->remainingQuota();
 
-            if (! $detail->is_unlimited) {
-                $detail->increment('quota_used');
-                $detail->refresh();
+            if (! $pool->is_unlimited) {
+                $pool->increment('quota_used');
+                $pool->refresh();
             }
 
-            $quotaAfter = $detail->is_unlimited ? null : $detail->remainingQuota();
+            $quotaAfter = $pool->is_unlimited ? null : $pool->remainingQuota();
 
             $attendance = Attendance::create([
                 'member_id' => $member->id,
@@ -139,7 +142,7 @@ class CashierService
                 'package_name' => $detail->membership->package_name ?? null,
                 'quota_before' => $quotaBefore,
                 'quota_after' => $quotaAfter,
-                'is_unlimited' => $detail->is_unlimited,
+                'is_unlimited' => $pool->is_unlimited,
                 'checked_in_at' => now(),
                 'created_by' => auth()->id(),
             ]);
@@ -148,9 +151,9 @@ class CashierService
                 'member_id' => $member->id,
                 'type' => 'checkin',
                 'title' => "Check In {$gymClass->name}",
-                'description' => $detail->is_unlimited
+                'description' => $pool->is_unlimited
                     ? 'Kuota unlimited'
-                    : "Sisa kuota: {$detail->remainingQuota()}x",
+                    : "Sisa kuota: {$pool->remainingQuota()}x",
                 'reference_type' => Attendance::class,
                 'reference_id' => $attendance->id,
             ]);

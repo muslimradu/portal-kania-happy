@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MembershipPackage } from '@/types/membership-package';
 import { formatCurrency } from '@/lib/format';
+import { detailsToGroups, formatGroupLabel } from '@/lib/membership-package-groups';
 
 interface Step2SelectPackageProps {
     packages: MembershipPackage[];
@@ -58,13 +59,18 @@ export default function Step2SelectPackage({ packages, selectedIds, onToggle, on
                                 </p>
                                 <p className="mt-1 text-xs text-gray-400">Masa aktif: {formatExpired(pkg.expired_type, pkg.expired_duration)} (dari check-in pertama)</p>
                                 <div className="mt-3 flex flex-wrap gap-1">
-                                    {pkg.details.map((detail) => (
+                                    {detailsToGroups(pkg.details.map((detail) => ({
+                                        gym_class_id: detail.gym_class_id,
+                                        quota: detail.quota,
+                                        is_unlimited: detail.is_unlimited,
+                                        quota_group: detail.quota_group,
+                                    }))).map((group, index) => (
                                         <span
-                                            key={detail.uuid}
+                                            key={index}
                                             className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
-                                            style={{ backgroundColor: detail.gym_class?.color_label ?? '#6b7280' }}
+                                            style={{ backgroundColor: pkg.details.find((detail) => detail.gym_class_id === group.gym_class_ids[0])?.gym_class?.color_label ?? '#6b7280' }}
                                         >
-                                            {detail.gym_class?.name} · {detail.is_unlimited ? 'Unlimited' : `${detail.quota}x`}
+                                            {formatGroupLabel(group, group.gym_class_ids.map((id) => pkg.details.find((detail) => detail.gym_class_id === id)?.gym_class?.name ?? 'Kelas'))}
                                         </span>
                                     ))}
                                 </div>

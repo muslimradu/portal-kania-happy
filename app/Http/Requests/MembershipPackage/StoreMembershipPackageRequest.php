@@ -24,6 +24,7 @@ class StoreMembershipPackageRequest extends FormRequest
             'is_active'        => ['boolean'],
             'details'                        => ['required', 'array', 'min:1'],
             'details.*.gym_class_id'         => ['required', 'exists:gym_classes,id'],
+            'details.*.quota_group'          => ['nullable', 'integer', 'min:1'],
             'details.*.quota'                => ['nullable', 'integer', 'min:1'],
             'details.*.is_unlimited'         => ['boolean'],
         ];

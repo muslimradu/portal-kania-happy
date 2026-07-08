@@ -11,6 +11,7 @@ export interface MembershipDetail {
     uuid: string;
     membership_id: number;
     gym_class_id: number | null;
+    quota_group: number | null;
     class_name: string;
     quota: number | null;
     quota_used: number;

@@ -39,14 +39,18 @@ const EXPIRED_TYPE_OPTIONS: { value: ExpiredType; label: string }[] = [
 ];
 
 function toFormState(details: MembershipDetail[]): DetailFormState[] {
-    return details.map((d) => ({
-        id: d.id,
-        class_name: d.class_name,
-        color: d.gym_class?.color_label ?? '#6b7280',
-        is_unlimited: d.is_unlimited,
-        quota: d.quota ?? 0,
-        quota_used: d.quota_used,
-    }));
+    return details
+        .filter((detail) => detail.quota_group == null || detail.quota != null)
+        .map((detail) => ({
+            id: detail.id,
+            class_name: detail.quota_group
+                ? details.filter((item) => item.quota_group === detail.quota_group).map((item) => item.class_name).join(' & ')
+                : detail.class_name,
+            color: detail.gym_class?.color_label ?? '#6b7280',
+            is_unlimited: detail.is_unlimited,
+            quota: detail.quota ?? 0,
+            quota_used: detail.quota_used,
+        }));
 }
 
 function toDateInputValue(value: string | null): string {

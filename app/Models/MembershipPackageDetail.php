@@ -15,6 +15,7 @@ class MembershipPackageDetail extends Model
     protected $fillable = [
         'membership_package_id',
         'gym_class_id',
+        'quota_group',
         'quota',
         'is_unlimited',
     ];
@@ -23,6 +24,7 @@ class MembershipPackageDetail extends Model
     {
         return [
             'is_unlimited' => 'boolean',
+            'quota_group'  => 'integer',
             'quota'        => 'integer',
         ];
     }
