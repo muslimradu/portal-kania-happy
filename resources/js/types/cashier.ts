@@ -67,7 +67,7 @@ export interface MemberTimelineItem {
     id: number;
     uuid: string;
     member_id: number;
-    type: 'purchase' | 'checkin';
+    type: 'purchase' | 'checkin' | 'update';
     title: string;
     description: string | null;
     created_at: string;
@@ -83,6 +83,7 @@ export interface AttendanceItem {
     quota_before: number | null;
     quota_after: number | null;
     is_unlimited: boolean;
+    source?: 'checkin' | 'quota_edit';
     checked_in_at: string;
     gym_class?: GymClass;
 }

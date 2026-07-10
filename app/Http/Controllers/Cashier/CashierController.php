@@ -37,7 +37,7 @@ class CashierController extends Controller
 
         $gymClasses = GymClass::active()
             ->withCount([
-                'attendances' => fn ($q) => $q->whereDate('checked_in_at', $today),
+                'attendances' => fn ($q) => $q->where('source', 'checkin')->whereDate('checked_in_at', $today),
                 'transactions' => fn ($q) => $q->whereDate('created_at', $today)->whereIn('status', ['paid', 'unpaid']),
             ])
             ->orderBy('name')

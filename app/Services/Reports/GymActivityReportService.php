@@ -205,7 +205,8 @@ class GymActivityReportService
 
         $attendances = DB::table('attendances')
             ->join('members', 'attendances.member_id', '=', 'members.id')
-            ->leftJoin('users as creators', 'attendances.created_by', '=', 'creators.id');
+            ->leftJoin('users as creators', 'attendances.created_by', '=', 'creators.id')
+            ->where('attendances.source', 'checkin');
 
         if ($gymClassId) {
             $attendances->where('attendances.gym_class_id', $gymClassId);

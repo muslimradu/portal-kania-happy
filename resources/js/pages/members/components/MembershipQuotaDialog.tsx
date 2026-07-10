@@ -134,7 +134,10 @@ export default function MembershipQuotaDialog({ open, onOpenChange, membership }
                     quota_used: d.quota_used,
                 })),
                 start_date: startDate || null,
-                end_date: expiredType === 'manual' ? manualEndIso : (computedEndDate || manualEndIso),
+                // ponytail: no start date ⇒ unused; don't keep stale end_date from the form
+                end_date: startDate
+                    ? (expiredType === 'manual' ? manualEndIso : (computedEndDate || manualEndIso))
+                    : null,
                 expired_type: expiredType,
                 expired_duration: expiredType === 'manual' ? null : expiredDuration,
             },

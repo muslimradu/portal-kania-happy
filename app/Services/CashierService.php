@@ -338,6 +338,7 @@ class CashierService
 
         $attendances = DB::table('attendances')
             ->join('members', 'attendances.member_id', '=', 'members.id')
+            ->where('attendances.source', 'checkin')
             ->whereBetween('attendances.checked_in_at', [$from, $to])
             ->selectRaw("
                 attendances.uuid,

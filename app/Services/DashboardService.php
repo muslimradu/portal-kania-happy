@@ -72,7 +72,7 @@ class DashboardService
             ->whereBetween('transaction_date', [$monthStart, $monthEnd])
             ->sum('amount');
 
-        $todayVisitors = Attendance::whereBetween('checked_in_at', [$todayStart, $todayEnd])->count()
+        $todayVisitors = Attendance::where('source', 'checkin')->whereBetween('checked_in_at', [$todayStart, $todayEnd])->count()
             + Transaction::where('status', 'paid')->whereBetween('created_at', [$todayStart, $todayEnd])->count();
 
         return [

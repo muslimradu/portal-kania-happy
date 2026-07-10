@@ -22,6 +22,7 @@ class Attendance extends Model
         'quota_before',
         'quota_after',
         'is_unlimited',
+        'source',
         'checked_in_at',
         'created_by',
     ];

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedInteger('quota_before')->nullable();
             $table->unsignedInteger('quota_after')->nullable();
             $table->boolean('is_unlimited')->default(false);
+            $table->string('source', 20)->default('checkin');
             $table->timestamp('checked_in_at');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();

@@ -42,6 +42,23 @@ export default function MemberShow({ member }: Props) {
     const [quotaTarget, setQuotaTarget] = useState<Membership | undefined>();
     const [deleteTarget, setDeleteTarget] = useState<Membership | undefined>();
 
+    const historyItems = [
+        ...(member.invoices ?? []).map((invoice) => ({
+            key: `invoice-${invoice.uuid}`,
+            kind: 'purchase' as const,
+            at: invoice.created_at,
+            invoice,
+        })),
+        ...(member.timelines ?? [])
+            .filter((timeline) => timeline.type === 'update')
+            .map((timeline) => ({
+                key: `update-${timeline.uuid}`,
+                kind: 'update' as const,
+                at: timeline.created_at,
+                timeline,
+            })),
+    ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+
     return (
         <AppLayout breadcrumb={[{ label: 'Daftar Member', href: route('members.index') }, { label: member.name }]}>
             <Head title={member.name} />
@@ -172,19 +189,20 @@ export default function MemberShow({ member }: Props) {
                     {/* History Tab */}
                     <TabsContent value="history" className="mt-4">
                         <div className="rounded-2xl bg-white shadow-sm">
-                            {(member.invoices ?? []).length === 0 ? (
+                            {historyItems.length === 0 ? (
                                 <EmptyState
                                     icon={StickyNote}
-                                    title="Belum ada riwayat pembelian"
-                                    description="Riwayat transaksi member akan muncul di sini."
+                                    title="Belum ada riwayat"
+                                    description="Riwayat pembelian dan perubahan membership akan muncul di sini."
                                 />
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm">
                                         <thead>
                                             <tr className="border-b border-gray-100">
-                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Tanggal Beli</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Paket</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Tanggal</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Aktivitas</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Detail</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Pembayaran</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Jumlah</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
@@ -192,25 +210,39 @@ export default function MemberShow({ member }: Props) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {(member.invoices ?? []).map((invoice) => (
-                                                <tr key={invoice.uuid} className="border-b border-gray-50 hover:bg-gray-50/50">
-                                                    <td className="px-4 py-3 text-gray-600">{formatDate(invoice.created_at)}</td>
-                                                    <td className="px-4 py-3 text-gray-900">
-                                                        {(invoice.memberships ?? []).map((m) => m.package_name).join(', ')}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-600">{PAYMENT_LABELS[invoice.payment_method]}</td>
-                                                    <td className="px-4 py-3 font-medium text-gray-900">{formatCurrency(Number(invoice.total_amount))}</td>
-                                                    <td className="px-4 py-3">
-                                                        <Badge
-                                                            className="rounded-full text-white"
-                                                            style={{ backgroundColor: invoice.status === 'paid' ? '#16a34a' : invoice.status === 'pending' ? '#f59e0b' : '#dc2626' }}
-                                                        >
-                                                            {invoice.status === 'paid' ? 'Lunas' : invoice.status === 'pending' ? 'Pending' : 'Dibatalkan'}
-                                                        </Badge>
-                                                    </td>
-                                                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{invoice.invoice_number}</td>
-                                                </tr>
-                                            ))}
+                                            {historyItems.map((item) =>
+                                                item.kind === 'purchase' ? (
+                                                    <tr key={item.key} className="border-b border-gray-50 hover:bg-gray-50/50">
+                                                        <td className="px-4 py-3 text-gray-600">{formatDate(item.invoice.created_at)}</td>
+                                                        <td className="px-4 py-3 text-gray-900">Pembelian</td>
+                                                        <td className="px-4 py-3 text-gray-900">
+                                                            {(item.invoice.memberships ?? []).map((m) => m.package_name).join(', ')}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-600">{PAYMENT_LABELS[item.invoice.payment_method]}</td>
+                                                        <td className="px-4 py-3 font-medium text-gray-900">{formatCurrency(Number(item.invoice.total_amount))}</td>
+                                                        <td className="px-4 py-3">
+                                                            <Badge
+                                                                className="rounded-full text-white"
+                                                                style={{ backgroundColor: item.invoice.status === 'paid' ? '#16a34a' : item.invoice.status === 'pending' ? '#f59e0b' : '#dc2626' }}
+                                                            >
+                                                                {item.invoice.status === 'paid' ? 'Lunas' : item.invoice.status === 'pending' ? 'Pending' : 'Dibatalkan'}
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="px-4 py-3 font-mono text-xs text-gray-500">{item.invoice.invoice_number}</td>
+                                                    </tr>
+                                                ) : (
+                                                    <tr key={item.key} className="border-b border-gray-50 hover:bg-gray-50/50">
+                                                        <td className="px-4 py-3 text-gray-600">{formatDate(item.timeline.created_at)}</td>
+                                                        <td className="px-4 py-3 text-gray-900">Perubahan</td>
+                                                        <td className="px-4 py-3 text-gray-900" colSpan={5}>
+                                                            <p className="font-medium">{item.timeline.title}</p>
+                                                            {item.timeline.description && (
+                                                                <p className="text-xs text-gray-500">{item.timeline.description}</p>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
@@ -225,14 +257,15 @@ export default function MemberShow({ member }: Props) {
                                 <EmptyState
                                     icon={History}
                                     title="Belum ada riwayat absensi"
-                                    description="Riwayat check-in member akan muncul di sini."
+                                    description="Riwayat check-in dan perubahan kuota member akan muncul di sini."
                                 />
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm">
                                         <thead>
                                             <tr className="border-b border-gray-100">
-                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Waktu Check In</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Waktu</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Aktivitas</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Kelas</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Membership</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Kuota Sebelum</th>
@@ -243,6 +276,9 @@ export default function MemberShow({ member }: Props) {
                                             {(member.attendances ?? []).map((attendance) => (
                                                 <tr key={attendance.uuid} className="border-b border-gray-50 hover:bg-gray-50/50">
                                                     <td className="px-4 py-3 text-gray-600">{formatDateTime(attendance.checked_in_at)}</td>
+                                                    <td className="px-4 py-3 text-gray-900">
+                                                        {attendance.source === 'quota_edit' ? 'Edit Kuota' : 'Check In'}
+                                                    </td>
                                                     <td className="px-4 py-3 text-gray-900">{attendance.class_name}</td>
                                                     <td className="px-4 py-3 text-gray-600">{attendance.package_name ?? '-'}</td>
                                                     <td className="px-4 py-3 text-gray-600">
@@ -267,7 +303,7 @@ export default function MemberShow({ member }: Props) {
                                 <EmptyState
                                     icon={ShoppingBag}
                                     title="Belum ada aktivitas"
-                                    description="Aktivitas pembelian dan check-in member akan muncul di sini."
+                                    description="Aktivitas pembelian, perubahan, dan check-in member akan muncul di sini."
                                 />
                             ) : (
                                 <div className="space-y-0">
@@ -278,10 +314,19 @@ export default function MemberShow({ member }: Props) {
                                             )}
                                             <div
                                                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white"
-                                                style={{ backgroundColor: timeline.type === 'purchase' ? '#f59e0b' : 'var(--brand-primary)' }}
+                                                style={{
+                                                    backgroundColor:
+                                                        timeline.type === 'purchase'
+                                                            ? '#f59e0b'
+                                                            : timeline.type === 'update'
+                                                              ? '#6b7280'
+                                                              : 'var(--brand-primary)',
+                                                }}
                                             >
                                                 {timeline.type === 'purchase' ? (
                                                     <ShoppingBag className="h-4 w-4" />
+                                                ) : timeline.type === 'update' ? (
+                                                    <Pencil className="h-4 w-4" />
                                                 ) : (
                                                     <Dumbbell className="h-4 w-4" />
                                                 )}

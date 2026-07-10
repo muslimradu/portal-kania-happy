@@ -100,6 +100,7 @@ class MembershipReportService
             ->selectSub(function ($q) {
                 $q->from('attendances')
                     ->selectRaw('MAX(checked_in_at)')
+                    ->where('source', 'checkin')
                     ->whereColumn('attendances.member_id', 'memberships.member_id');
             }, 'last_checkin_at')
             ->with(['member:id,uuid,name,phone', 'membershipPackage:id,uuid,name', 'details']);

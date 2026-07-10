@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('member_id');
-            $table->enum('type', ['purchase', 'checkin']);
+            $table->enum('type', ['purchase', 'checkin', 'update']);
             $table->string('title');
             $table->string('description')->nullable();
             $table->string('reference_type')->nullable();
